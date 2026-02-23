@@ -1,6 +1,17 @@
 {
   "name": "ngx-dynamic-toast",
   "version": "0.0.1",
+  "description": "Dynamic toast notifications for Angular",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ederjavs/ngx-dynamic-toast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ederjavs/ngx-dynamic-toast/issues"
+  },
+  "homepage": "https://github.com/ederjavs/ngx-dynamic-toast#readme",
+  "author": "ederjavs",
+  "license": "MIT",
   "peerDependencies": {
     "@angular/common": "^21.1.0",
     "@angular/core": "^21.1.0"
