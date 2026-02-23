@@ -1,0 +1,24 @@
+@for (group of groups(); track group.pos) {
+  <section
+    data-dt-viewport
+    [attr.data-position]="group.pos"
+    aria-live="polite"
+    [style.top]="group.style?.top"
+    [style.right]="group.style?.right"
+    [style.bottom]="group.style?.bottom"
+    [style.left]="group.style?.left"
+  >
+    @for (t of group.items; track t.id) {
+      <dt-toast
+        [toast]="t"
+        [pillAlign]="group.pill"
+        [expandEdge]="group.expand"
+        [canExpand]="activeId() === undefined || activeId() === t.id"
+        (entered)="onToastEnter($event)"
+        (left)="onToastLeave($event)"
+        (dismissed)="service.dismiss($event)"
+      />
+    }
+  </section>
+}
+

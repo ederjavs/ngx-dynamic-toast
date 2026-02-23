@@ -1,0 +1,148 @@
+<button
+  type="button"
+  data-dt-toast
+  [attr.data-ready]="ready()"
+  [attr.data-expanded]="open()"
+  [attr.data-exiting]="toast().exiting || false"
+  [attr.data-edge]="expandEdge()"
+  [attr.data-position]="pillAlign()"
+  [attr.data-state]="view().state"
+  [class]="toast().className || ''"
+  [style.--_h]="HEIGHT + 'px'"
+  [style.--_pw]="(pillWidth() || HEIGHT) + 'px'"
+  [style.--_px]="pillX() + 'px'"
+  [style.--_ht]="headerTransform()"
+  [style.--_co]="open() ? 1 : 0"
+  [style.animation-duration]="(toast().duration || 6000) + 'ms'"
+  (mouseenter)="handleEnter()"
+  (mouseleave)="handleLeave()"
+  (transitionend)="handleTransitionEnd($event)"
+  (pointerdown)="handlePointerDown($event)"
+>
+  <div
+    data-dt-canvas
+    [attr.data-edge]="expandEdge()"
+    [style.filter]="'url(#' + filterId + ')'"
+  >
+    <svg
+      data-dt-svg
+      [attr.width]="WIDTH"
+      [attr.height]="svgHeight()"
+      [attr.viewBox]="'0 0 ' + WIDTH + ' ' + svgHeight()"
+    >
+      <defs>
+        <filter
+          [id]="filterId"
+          x="-20%"
+          y="-20%"
+          width="140%"
+          height="140%"
+          colorInterpolationFilters="sRGB"
+        >
+          <feGaussianBlur
+            in="SourceGraphic"
+            [attr.stdDeviation]="blur()"
+            result="blur"
+          />
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"
+            result="goo"
+          />
+          <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+        </filter>
+      </defs>
+
+      <path
+        data-dt-pill
+        [attr.d]="pillPath()"
+        [attr.fill]="view().fill"
+      />
+
+      <path
+        data-dt-body
+        [attr.d]="bodyPath()"
+        [attr.fill]="view().fill"
+        [attr.opacity]="open() ? 1 : 0"
+      />
+    </svg>
+  </div>
+
+  <div #headerRef data-dt-header [attr.data-edge]="expandEdge()">
+    <div data-dt-header-stack>
+      <div
+        #innerRef
+        data-dt-header-inner
+        data-layer="current"
+      >
+        <div
+          data-dt-badge
+          [attr.data-state]="view().state"
+          [class]="view().styles?.badge || ''"
+          [innerHTML]="resolvedIcon(view())"
+        ></div>
+        <span
+          data-dt-title
+          [attr.data-state]="view().state"
+          [class]="view().styles?.title || ''"
+        >
+          {{ view().title }}
+        </span>
+      </div>
+
+      <!-- @if (headerLayerPrev(); as prev) {
+        <div data-dt-header-inner data-layer="prev" data-exiting="true">
+          <div
+            data-dt-badge
+            [attr.data-state]="prev.view.state"
+            [class]="prev.view.styles?.badge || ''"
+            [innerHTML]="resolvedIcon(prev.view)"
+          ></div>
+          <span
+            data-dt-title
+            [attr.data-state]="prev.view.state"
+            [class]="prev.view.styles?.title || ''"
+          >
+            {{ prev.view.title }}
+          </span>
+        </div>
+      } -->
+    </div>
+  </div>
+
+  @if (hasDesc()) {
+    <div
+      data-dt-content
+      [attr.data-edge]="expandEdge()"
+      [attr.data-visible]="open()"
+    >
+      <div
+        #contentRef
+        data-dt-description
+        [class]="view().styles?.description || ''"
+      >
+        @if (view().description) {
+          <span>{{ view().description }}</span>
+        }
+        @if (view().contentTemplate) {
+          <ng-container
+            [ngTemplateOutlet]="view().contentTemplate"
+          ></ng-container>
+        }
+        @if (view().button) {
+          <a
+            href="#"
+            data-dt-button
+            [attr.data-state]="view().state"
+            [class]="view().styles?.button || ''"
+            (click)="handleButtonClick($event)"
+          >
+            {{ view().button?.title }}
+          </a>
+        }
+      </div>
+    </div>
+  }
+</button>
+

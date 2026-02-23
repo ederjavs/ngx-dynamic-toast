@@ -1,0 +1,580 @@
+[data-dt-viewport] {
+  --sileo-spring-easing: linear(
+    0,
+    0.002 0.6%,
+    0.007 1.2%,
+    0.015 1.8%,
+    0.026 2.4%,
+    0.041 3.1%,
+    0.06 3.8%,
+    0.108 5.3%,
+    0.157 6.6%,
+    0.214 8%,
+    0.467 13.7%,
+    0.577 16.3%,
+    0.631 17.7%,
+    0.682 19.1%,
+    0.73 20.5%,
+    0.771 21.8%,
+    0.808 23.1%,
+    0.844 24.5%,
+    0.874 25.8%,
+    0.903 27.2%,
+    0.928 28.6%,
+    0.952 30.1%,
+    0.972 31.6%,
+    0.988 33.1%,
+    1.01 35.7%,
+    1.025 38.5%,
+    1.034 41.6%,
+    1.038 45%,
+    1.035 50.1%,
+    1.012 64.2%,
+    1.003 73%,
+    0.999 83.7%,
+    1
+  );
+
+  --sileo-duration: 600ms;
+  --sileo-height: 40px;
+  --sileo-width: 350px;
+
+  --sileo-state-success: oklch(0.723 0.219 142.136);
+  --sileo-state-loading: oklch(0.556 0 0);
+  --sileo-state-error: oklch(0.637 0.237 25.331);
+  --sileo-state-warning: oklch(0.795 0.184 86.047);
+  --sileo-state-info: oklch(0.685 0.169 237.323);
+  --sileo-state-action: oklch(0.623 0.214 259.815);
+}
+
+[data-dt-toast] {
+  position: relative;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  width: var(--sileo-width);
+  height: var(--_h, var(--sileo-height));
+  opacity: 0;
+  transform: translateZ(0) scale(0.95);
+  transform-origin: center;
+  contain: layout style;
+  overflow: visible;
+  color: #ffffff;
+  transition: all var(--sileo-duration) var(--sileo-spring-easing);
+  /* Stronger shadow for stacking depth */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))
+    drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
+}
+
+/* --- PROGRESS BAR (Feedback Visual) --- */
+/* REMOVED as per request */
+[data-dt-toast]::after {
+  display: none !important;
+}
+
+/* --- STACKING LOGIC (Sonner-like) --- */
+
+/* Default State (Not Hovering Viewport): Stacked */
+[data-dt-viewport]:not(:hover) [data-dt-toast] {
+  position: absolute;
+  /* Add consistent spacing/air - Increased to 1.5rem to match Sileo look */
+  right: 1.5rem;
+  margin: 0 !important;
+  transition: all 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Specific handling for left/center alignment */
+[data-dt-viewport][data-position$="left"]:not(:hover) [data-dt-toast] {
+  right: auto;
+  left: 1.5rem;
+}
+[data-dt-viewport][data-position^="top"]:not(:hover) [data-dt-toast] {
+  top: 1.5rem !important;
+}
+[data-dt-viewport][data-position^="bottom"]:not(:hover) [data-dt-toast] {
+  bottom: 1.5rem !important;
+}
+[data-dt-viewport][data-position$="center"]:not(:hover) [data-dt-toast] {
+  right: auto;
+  left: auto;
+  /* center is handled by flex align-items: center on parent */
+  position: relative; /* Stacking might be tricky centered, fallback to relative */
+  margin-bottom: -30px !important; /* Overlap manually */
+}
+
+/* Top Position Stacking */
+[data-dt-viewport][data-position^="top"]:not(:hover) [data-dt-toast] {
+  top: 1.5rem !important; /* Force margin from top */
+  /* Reverse index logic logic handled below via nth-last-child */
+}
+
+[data-dt-viewport][data-position^="bottom"]:not(:hover) [data-dt-toast] {
+  bottom: 1.5rem !important;
+}
+
+/* Stacking Depth Logic - Up to 3 visible */
+/* The LAST element is the NEWEST (top of stack) */
+[data-dt-viewport]:not(:hover)
+  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
+    1
+  ) {
+  z-index: 5;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+[data-dt-viewport][data-position^="top"]:not(:hover)
+  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
+    2
+  ) {
+  z-index: 4;
+  transform: translateY(-14px) scale(0.95);
+  opacity: 1;
+  filter: brightness(0.9);
+}
+
+[data-dt-viewport][data-position^="bottom"]:not(:hover)
+  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
+    2
+  ) {
+  z-index: 4;
+  transform: translateY(14px) scale(0.95);
+  opacity: 1;
+  filter: brightness(0.9);
+}
+
+[data-dt-viewport][data-position^="top"]:not(:hover)
+  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
+    3
+  ) {
+  z-index: 3;
+  transform: translateY(-28px) scale(0.9);
+  opacity: 0.8;
+  filter: brightness(0.8);
+}
+
+[data-dt-viewport][data-position^="bottom"]:not(:hover)
+  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
+    3
+  ) {
+  z-index: 3;
+  transform: translateY(28px) scale(0.9);
+  opacity: 0.8;
+  filter: brightness(0.8);
+}
+
+/* Hide deeper toasts */
+[data-dt-viewport]:not(:hover)
+  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
+    n + 4
+  ) {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0) scale(0.8);
+  z-index: 0;
+}
+
+/* --- EXPANDED STATE (Hovering Viewport) --- */
+[data-dt-viewport]:hover [data-dt-toast] {
+  position: relative; /* Return to flow */
+  transform: none; /* No scaling/translation */
+  opacity: 1;
+  filter: none;
+  z-index: auto;
+  /* Add gap spacing via margin since we can't use gap property easily with mixed positioning transitions */
+}
+
+/* Add spacing in expanded mode */
+[data-dt-viewport][data-position^="top"]:hover
+  [data-dt-toast]
+  + [data-dt-toast] {
+  margin-top: 10px;
+}
+[data-dt-viewport][data-position^="bottom"]:hover
+  [data-dt-toast]
+  + [data-dt-toast] {
+  margin-bottom: 10px;
+}
+/* Re-order for top: newest (last) should be visually first? 
+   No, usually lists are oldest top, newest bottom. 
+   Or Newest Top.
+   If flex-col-reverse is used, DOM order is reversed visually.
+*/
+
+[data-dt-toast][data-state="loading"] {
+  cursor: default;
+}
+
+[data-dt-toast][data-ready="true"] {
+  opacity: 1;
+  transform: translateZ(0) scale(1);
+  transition:
+    transform calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),
+    opacity calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),
+    margin-bottom calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),
+    margin-top calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),
+    height var(--sileo-duration) var(--sileo-spring-easing);
+}
+
+[data-dt-toast][data-ready="true"][data-exiting="true"] {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+[data-dt-viewport][data-position^="top"]
+  [data-dt-toast]:not([data-ready="true"]) {
+  transform: translateY(-6px) scale(0.95);
+  opacity: 0 !important;
+}
+
+[data-dt-viewport][data-position^="bottom"]
+  [data-dt-toast]:not([data-ready="true"]) {
+  transform: translateY(6px) scale(0.95);
+  opacity: 0 !important;
+}
+
+[data-dt-viewport][data-position^="top"]
+  [data-dt-toast][data-ready="true"][data-exiting="true"] {
+  transform: translateY(-6px) scale(0.95);
+}
+
+[data-dt-viewport][data-position^="bottom"]
+  [data-dt-toast][data-ready="true"][data-exiting="true"] {
+  transform: translateY(6px) scale(0.95);
+}
+
+[data-dt-canvas] {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+  contain: layout style;
+  overflow: visible;
+}
+
+[data-dt-canvas][data-edge="top"] {
+  bottom: 0;
+  transform: scaleY(-1) translateZ(0);
+}
+
+[data-dt-canvas][data-edge="bottom"] {
+  top: 0;
+}
+
+[data-dt-svg] {
+  overflow: visible;
+}
+
+[data-dt-header] {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  height: var(--sileo-height);
+  overflow: hidden;
+  left: var(--_px, 0px);
+  transform: var(--_ht);
+  max-width: var(--_pw);
+}
+
+[data-dt-toast][data-ready="true"] [data-dt-header] {
+  transition:
+    transform var(--sileo-duration) var(--sileo-spring-easing),
+    left var(--sileo-duration) var(--sileo-spring-easing),
+    max-width var(--sileo-duration) var(--sileo-spring-easing);
+}
+
+[data-dt-header][data-edge="top"] {
+  bottom: 0;
+}
+
+[data-dt-header][data-edge="bottom"] {
+  top: 0;
+}
+
+[data-dt-header-stack] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+
+[data-dt-header-inner] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateZ(0);
+}
+
+[data-dt-header-inner][data-layer="current"] {
+  position: relative;
+  z-index: 1;
+  animation: dt-header-enter var(--sileo-duration) var(--sileo-spring-easing)
+    both;
+}
+
+[data-dt-header-inner][data-layer="prev"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-dt-header-inner][data-exiting="true"] {
+  animation: dt-header-exit calc(var(--sileo-duration) * 0.7) ease forwards;
+}
+
+[data-dt-badge] {
+  display: flex;
+  height: 24px;
+  width: 24px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  box-sizing: border-box;
+  border-radius: 9999px;
+  color: var(--sileo-tone, currentColor);
+  background-color: var(--sileo-tone-bg, transparent);
+}
+
+[data-dt-title] {
+  font-size: 0.825rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: var(--sileo-tone, currentColor);
+}
+
+:is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state] {
+  --_c: var(--sileo-state-success);
+}
+
+:is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state="loading"] {
+  --_c: var(--sileo-state-loading);
+}
+
+:is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state="error"] {
+  --_c: var(--sileo-state-error);
+}
+
+:is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state="warning"] {
+  --_c: var(--sileo-state-warning);
+}
+
+:is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state="info"] {
+  --_c: var(--sileo-state-info);
+}
+
+:is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state="action"] {
+  --_c: var(--sileo-state-action);
+}
+
+:is([data-dt-badge], [data-dt-title])[data-state] {
+  --sileo-tone: var(--_c);
+  --sileo-tone-bg: color-mix(in oklch, var(--_c) 20%, transparent);
+}
+
+[data-dt-content] {
+  position: absolute;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  pointer-events: none;
+  opacity: var(--_co, 0);
+}
+
+[data-dt-content]:not([data-visible="true"]) {
+  content-visibility: hidden;
+}
+
+[data-dt-toast][data-ready="true"] [data-dt-content] {
+  transition: opacity calc(var(--sileo-duration) * 0.08) ease
+    calc(var(--sileo-duration) * 0.04);
+}
+
+[data-dt-content][data-edge="top"] {
+  top: 0;
+}
+
+[data-dt-content][data-edge="bottom"] {
+  top: var(--sileo-height);
+}
+
+[data-dt-content][data-visible="true"] {
+  pointer-events: auto;
+}
+
+[data-dt-toast][data-ready="true"] [data-dt-content][data-visible="true"] {
+  transition: opacity calc(var(--sileo-duration) * 0.6) ease
+    calc(var(--sileo-duration) * 0.3);
+}
+
+[data-dt-description] {
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+[data-dt-button] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  padding: 0 0.625rem;
+  margin-top: 0.75rem;
+  border-radius: 9999px;
+  border: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--sileo-btn-color, currentColor);
+  background-color: var(--sileo-btn-bg, transparent);
+  transition: background-color 150ms ease;
+}
+
+[data-dt-button]:hover {
+  background-color: var(--sileo-btn-bg-hover, transparent);
+}
+
+[data-dt-button][data-state] {
+  --sileo-btn-color: var(--_c);
+  --sileo-btn-bg: color-mix(in oklch, var(--_c) 15%, transparent);
+  --sileo-btn-bg-hover: color-mix(in oklch, var(--_c) 25%, transparent);
+}
+
+[data-dt-icon="spin"] {
+  animation: dt-spin 1s linear infinite;
+}
+
+@keyframes dt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dt-header-enter {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+@keyframes dt-header-exit {
+  from {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+
+[data-dt-viewport] {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  gap: 0; /* Handled via margins/stacking */
+  padding: 1.5rem; /* Increased padding for expanded state */
+  /* pointer-events: none; REMOVED to allow hover on viewport */
+  pointer-events: auto;
+  max-width: calc(100vw - 1.5rem);
+  contain: layout style;
+  transition: all 300ms ease;
+  height: auto;
+}
+
+/* Ensure viewport doesn't block clicks when empty or not hovering, 
+   but we need pointer-events auto for the hover to work. 
+   Actually, if we put pointer-events: none on viewport, hover won't trigger.
+   But if we put auto, it blocks clicks underneath.
+   Solution: pointer-events: none on viewport, auto on toasts.
+   BUT then viewport:hover won't work easily if gaps are empty.
+   Compromise: pointer-events: none, but use a large invisible capture area or 
+   rely on hovering a toast to trigger expansion of siblings?
+   Standard implementation: The stack is small, blocking a small area is fine.
+*/
+[data-dt-viewport] {
+  pointer-events: none; /* Default to pass-through */
+}
+[data-dt-toast] {
+  pointer-events: auto; /* Items capture clicks */
+}
+/* We need the viewport to capture hover to expand stack. 
+   If pointer-events is none, hover doesn't bubble from children to parent in a way that triggers :hover styles on parent 
+   if the cursor is strictly over a child? Yes it does.
+   Hovering a child triggers hover on parent.
+   So pointer-events: none on viewport + auto on children works for expanding when touching a toast.
+*/
+
+[data-dt-viewport][data-position^="top"]
+  [data-dt-toast]:not([data-ready="true"]) {
+  margin-bottom: calc(-1 * (var(--sileo-height) + 0.75rem));
+}
+
+[data-dt-viewport][data-position^="bottom"]
+  [data-dt-toast]:not([data-ready="true"]) {
+  margin-top: calc(-1 * (var(--sileo-height) + 0.75rem));
+}
+
+[data-dt-viewport][data-position^="top"] {
+  top: 0;
+  flex-direction: column-reverse;
+}
+
+[data-dt-viewport][data-position^="bottom"] {
+  bottom: 0;
+  flex-direction: column;
+}
+
+[data-dt-viewport][data-position$="left"] {
+  left: 0;
+  align-items: flex-start;
+}
+
+[data-dt-viewport][data-position$="right"] {
+  right: 0;
+  align-items: flex-end;
+}
+
+[data-dt-viewport][data-position$="center"] {
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-dt-toast][data-ready="true"]:hover,
+  [data-dt-toast][data-ready="true"][data-exiting="true"] {
+    will-change: transform, opacity, height;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dt-viewport],
+  [data-dt-viewport] *,
+  [data-dt-viewport] *::before,
+  [data-dt-viewport] *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+  }
+}
