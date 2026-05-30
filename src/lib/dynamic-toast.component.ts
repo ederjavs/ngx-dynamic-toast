@@ -65,6 +65,8 @@ interface HeaderLayer {
 })
 export class DynamicToastComponent implements AfterViewInit, OnDestroy {
   toast = input.required<DynamicToastItem>();
+  anchorWidth = input<number>(0);
+  anchorHeight = input<number>(0);
   pillAlign = input<PillAlign>("left");
   expandEdge = input<ExpandEdge>("bottom");
   canExpand = input<boolean>(true);
@@ -88,6 +90,7 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
   private autoExpandTimer: number | null = null;
   private autoCollapseTimer: number | null = null;
   private swapTimer: number | null = null;
+  private rafHeader: number | null = null;
   private pendingSwap: { key?: string; payload: View } | null = null;
   private pointerStartY: number | null = null;
 
@@ -169,18 +172,33 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
 
   expandedContent = computed(() => Math.max(0, this.expanded() - HEIGHT));
 
-  resolvedPillWidth = computed(() =>
-    Math.max(this.pillWidth() || HEIGHT, HEIGHT),
-  );
+  resolvedPillWidth = computed(() => {
+    const w = this.pillWidth();
+    const aw = this.anchorWidth();
+    if (aw > 0) {
+      return Math.max(w, aw + 4);
+    }
+    return Math.max(w || HEIGHT, HEIGHT);
+  });
 
-  pillHeight = computed(() => HEIGHT + this.blur() * 3);
+  pillHeight = computed(() => {
+    const ah = this.anchorHeight();
+    const baseHeight = ah > 0 ? ah + 4 : HEIGHT;
+    return baseHeight + this.blur() * 3;
+  });
 
   pillX = computed(() => {
-    const w = this.resolvedPillWidth();
-    const pos = this.pillAlign();
-    if (pos === "right") return WIDTH - w;
-    if (pos === "center") return (WIDTH - w) / 2;
-    return 0;
+    const align = this.pillAlign();
+    const pw = this.resolvedPillWidth();
+    const aw = this.anchorWidth();
+    
+    if (aw > 0) {
+      return (WIDTH - pw) / 2;
+    }
+
+    if (align === "left") return 0;
+    if (align === "right") return WIDTH - pw;
+    return (WIDTH - pw) / 2;
   });
 
   headerTransform = computed(() => {
@@ -198,7 +216,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
     effect(
       () => {
         const t = this.toast();
-        console.log('[DynamicToast] View sync effect triggered for:', t.id);
         const next: View = {
           title: t.title,
           description: t.description,
@@ -222,8 +239,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
         const toast = this.toast();
         const exiting = toast.exiting;
 
-        console.log('[DynamicToast] Auto-expand effect triggered for:', toast.id, { hasDesc, allowExpand, exiting });
-
         if (!hasDesc) return;
         if (exiting || !allowExpand) {
           this.isExpanded.set(false);
@@ -235,7 +250,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
 
         if (expandDelay == null && collapseDelay == null) return;
 
-        // Clear previous timers
         if (this.autoExpandTimer) {
           window.clearTimeout(this.autoExpandTimer);
           this.autoExpandTimer = null;
@@ -264,7 +278,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
       { allowSignalWrites: true },
     );
 
-    // Freeze expanded height when closing for smooth animation
     effect(
       () => {
         if (this.open()) {
@@ -274,9 +287,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
       { allowSignalWrites: true },
     );
 
-    // Removed manual motionAnimate calls since CSS handles transitions.
-
-    // Mark ready after first render
     queueMicrotask(() => {
       this.ready.set(true);
       this.ensureMeasurements();
@@ -284,7 +294,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    // No-op since we migrated to CSS transitions
   }
 
   private applyView(next: View) {
@@ -311,8 +320,6 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  // SVG animations are now completely handled by CSS transitions.
-
   ngOnDestroy() {
     this.roHeader?.disconnect();
     this.roContent?.disconnect();
@@ -320,64 +327,65 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
     if (this.autoExpandTimer) window.clearTimeout(this.autoExpandTimer);
     if (this.autoCollapseTimer) window.clearTimeout(this.autoCollapseTimer);
     if (this.swapTimer) window.clearTimeout(this.swapTimer);
+    if (this.rafHeader) cancelAnimationFrame(this.rafHeader);
   }
 
   private ensureMeasurements() {
     if (this.hasMeasured) return;
     this.hasMeasured = true;
 
-    const root = this.hostEl.nativeElement;
-    const inner = root.querySelector<HTMLElement>(
-      "[data-dt-header-inner][data-layer='current']",
-    );
-    const header = root.querySelector<HTMLElement>("[data-dt-header]");
-    const content = root.querySelector<HTMLElement>("[data-dt-description]");
-    if (!inner || !header) return;
+    this.ngZone.runOutsideAngular(() => {
+      const root = this.hostEl.nativeElement;
+      const inner = root.querySelector<HTMLElement>(
+        "[data-dt-header-inner][data-layer='current']",
+      );
+      const header = root.querySelector<HTMLElement>("[data-dt-header]");
+      const content = root.querySelector<HTMLElement>("[data-dt-description]");
 
-    // Throttled measurement
-    let rafHeader: number | null = null;
-    const measureHeader = () => {
-      if (rafHeader) return;
-      this.ngZone.runOutsideAngular(() => {
-        rafHeader = requestAnimationFrame(() => {
-          rafHeader = null;
+      const measureHeader = () => {
+        if (this.rafHeader) return;
+        this.rafHeader = requestAnimationFrame(() => {
+          this.rafHeader = null;
+          if (!inner || !header) return;
           const cs = getComputedStyle(header);
           const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-          const w = inner.scrollWidth + pad + PILL_PADDING;
+          
+          let w = inner.scrollWidth + pad + PILL_PADDING;
+          
+          const aw = this.anchorWidth();
+          if (aw > 0) {
+            w += aw; 
+          }
+          
           if (Math.abs(w - this.pillWidth()) > 1.5) {
             this.pillWidth.set(w);
             this.cdr.detectChanges();
           }
         });
-      });
-    };
+      };
 
-    let rafContent: number | null = null;
-    const measureContent = () => {
-      const el = root.querySelector<HTMLElement>("[data-dt-description]");
-      if (!el) return;
-      if (rafContent) return;
-      this.ngZone.runOutsideAngular(() => {
-        rafContent = requestAnimationFrame(() => {
-          rafContent = null;
-          if (Math.abs(el.scrollHeight - this.contentHeight()) > 1.5) {
-            this.contentHeight.set(el.scrollHeight);
-            this.cdr.detectChanges();
-          }
+      let rafContent: number | null = null;
+      const measureContent = () => {
+        const el = root.querySelector<HTMLElement>("[data-dt-description]");
+        if (!el) return;
+        if (rafContent) return;
+        this.ngZone.runOutsideAngular(() => {
+          rafContent = requestAnimationFrame(() => {
+            rafContent = null;
+            if (Math.abs(el.scrollHeight - this.contentHeight()) > 1.5) {
+              this.contentHeight.set(el.scrollHeight);
+              this.cdr.detectChanges();
+            }
+          });
         });
-      });
-    };
+      };
 
-    measureHeader();
-    measureContent();
-
-    this.roHeader = new ResizeObserver(() => measureHeader());
-    this.roHeader.observe(inner);
-
-    if (content) {
+      this.roHeader = new ResizeObserver(() => measureHeader());
       this.roContent = new ResizeObserver(() => measureContent());
-      this.roContent.observe(content);
-    }
+      
+      if (inner) this.roHeader.observe(inner);
+      if (content) this.roContent.observe(content);
+    });
   }
 
   resolvedIcon(v: View): SafeHtml {

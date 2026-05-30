@@ -79,9 +79,19 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
       // Wrap host in a relative container if not already
       const wrapper = this.renderer.createElement("div");
       this.renderer.setStyle(wrapper, "position", "relative");
-      this.renderer.setStyle(wrapper, "display", "inline-block");
+      this.renderer.setStyle(wrapper, "display", "inline-flex");
+      this.renderer.setStyle(wrapper, "justify-content", "center");
+      
       parent.insertBefore(wrapper, this.el.nativeElement);
+      
+      // Make the host element appear ABOVE the toast
+      this.renderer.setStyle(this.el.nativeElement, "position", "relative");
+      this.renderer.setStyle(this.el.nativeElement, "z-index", "60");
+      
       wrapper.appendChild(this.el.nativeElement);
+      
+      // Put the container behind it
+      this.renderer.setStyle(this.container, "z-index", "40");
       wrapper.appendChild(this.container!);
     }
 
@@ -155,11 +165,15 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
   }
 
   private updateContainerPosition() {
-    if (!this.container) return;
     // Container is already positioned via CSS (absolute, centered)
-    // The width of the toast should adapt to at least the anchor width
     const anchorWidth = this.el.nativeElement.offsetWidth;
-    this.container.style.minWidth = `${anchorWidth}px`;
+    const anchorHeight = this.el.nativeElement.offsetHeight;
+    
+    // We update the component to know about the anchor's dimensions so it can border it perfectly
+    if (this.toastCompRef) {
+      this.toastCompRef.setInput("anchorWidth", anchorWidth);
+      this.toastCompRef.setInput("anchorHeight", anchorHeight);
+    }
   }
 
   ngOnDestroy() {

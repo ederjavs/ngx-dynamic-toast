@@ -287,7 +287,7 @@
 }
 
 [data-dt-content]:not([data-visible="true"]) {
-  content-visibility: hidden;
+  visibility: hidden;
 }
 
 [data-dt-toast][data-ready="true"] [data-dt-content] {
@@ -319,7 +319,6 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
   contain: layout style paint;
-  content-visibility: auto;
 }
 
 /* ================================== Button ================================= */

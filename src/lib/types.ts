@@ -77,3 +77,4 @@ export interface DynamicToastPromiseOptions<T = unknown> {
   action?: DynamicToastOptions | ((data: T) => DynamicToastOptions);
   position?: DynamicToastPosition;
 }
+

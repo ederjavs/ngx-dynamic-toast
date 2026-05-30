@@ -27,13 +27,13 @@ import {
       <!-- Main Layout -->
       <header class="header">
         <div class="logo-area">
-          <div class="logo-icon">🏝️</div>
+          <div class="logo-text-icon">ND</div>
           <div>
             <h1>ngx-dynamic-toast</h1>
-            <p class="subtitle">Liquid-smooth spring-physics notifications & Dynamic Islands for Angular</p>
+            <p class="subtitle">Liquid-smooth spring-physics notifications and Dynamic Islands for Angular</p>
           </div>
         </div>
-        <div class="badge">Inspired by Sileo</div>
+        <div class="badge">Sileo Fidelity</div>
       </header>
 
       <main class="grid-layout">
@@ -48,17 +48,17 @@ import {
               <button 
                 [class.active]="theme() === 'dark'" 
                 (click)="theme.set('dark')">
-                🌙 Dark
+                Dark
               </button>
               <button 
                 [class.active]="theme() === 'light'" 
                 (click)="theme.set('light')">
-                ☀️ Light
+                Light
               </button>
               <button 
                 [class.active]="theme() === 'system'" 
                 (click)="theme.set('system')">
-                💻 System
+                System
               </button>
             </div>
           </div>
@@ -92,27 +92,27 @@ import {
 
         <!-- Standard Toasts Panel -->
         <section class="glass-panel action-panel">
-          <h2>Generic Notifications</h2>
+          <h2>Telemetry Notifications</h2>
           <p class="panel-desc">Trigger high-fidelity spring animated toasts with beautiful gooey entry transitions.</p>
 
           <div class="btn-grid">
             <button class="btn btn-success" (click)="triggerSuccess()">
-              <span>🟢</span> Success Toast
+              Success Toast
             </button>
             <button class="btn btn-danger" (click)="triggerError()">
-              <span>🔴</span> Error Toast
+              Error Toast
             </button>
             <button class="btn btn-info" (click)="triggerInfo()">
-              <span>🔵</span> Info Toast
+              Info Toast
             </button>
             <button class="btn btn-warning" (click)="triggerWarning()">
-              <span>🟡</span> Warning Toast
+              Warning Toast
             </button>
             <button class="btn btn-secondary" (click)="triggerLoading()">
-              <span>⏳</span> Loading (Async Resolve)
+              Loading (Async Resolve)
             </button>
             <button class="btn btn-secondary" (click)="triggerActionToast()">
-              <span>🔄</span> Toast with Undo Action
+              Toast with Action
             </button>
           </div>
 
@@ -123,13 +123,13 @@ import {
             <input type="text" [(ngModel)]="customTitle" placeholder="Toast Title..." class="text-input" />
             <textarea [(ngModel)]="customDesc" placeholder="Toast Description (optional)..." class="textarea-input"></textarea>
             <button class="btn btn-primary" (click)="triggerCustom()">
-              🚀 Launch Custom Toast
+              Launch Custom Toast
             </button>
           </div>
 
           <div class="global-actions">
             <button class="btn btn-secondary danger-text" (click)="clearAll()">
-              🗑️ Clear All Toasts
+              Clear All Toasts
             </button>
           </div>
         </section>
@@ -138,8 +138,8 @@ import {
         <section class="glass-panel action-panel wide-panel">
           <h2>Dynamic Island Anchors</h2>
           <p class="panel-desc">
-            Toasts will warp and expand **directly around the button or element** that triggered them, just like the iOS Dynamic Island! 
-            The element remains perfectly active and styled inside the card.
+            Toasts will warp and expand directly around the DOM element that triggered them, just like the iOS Dynamic Island.
+            The target element remains fully interactive and custom-styled within the expanding black card.
           </p>
 
           <div class="island-showcase-grid">
@@ -152,7 +152,7 @@ import {
               <div class="card-body">
                 <div dtDynamicIsland dtIslandId="save-island" class="island-anchor-wrapper">
                   <button class="btn btn-primary" (click)="runSaveSimulation()">
-                    💾 Save Document
+                    Save Document
                   </button>
                 </div>
               </div>
@@ -167,7 +167,7 @@ import {
               <div class="card-body">
                 <div dtDynamicIsland dtIslandId="confirm-island" class="island-anchor-wrapper">
                   <button class="btn btn-danger" (click)="runConfirmationPrompt()">
-                    ⚠️ Delete Account
+                    Delete Account
                   </button>
                 </div>
               </div>
@@ -176,13 +176,13 @@ import {
             <!-- Case 3: Music Playback Indicator -->
             <div class="island-card">
               <div class="card-header">
-                <h4>Media Status Controller</h4>
-                <p>Expands into a fully custom floating notification directly attached to a card layout.</p>
+                <h4>System Diagnostic Connection</h4>
+                <p>Expands into a custom status monitor attached directly to the diagnostic action.</p>
               </div>
               <div class="card-body">
                 <div dtDynamicIsland dtIslandId="music-island" class="island-anchor-wrapper">
                   <button class="btn btn-info" (click)="toggleMusicPlayback()">
-                    🎵 {{ isPlaying ? 'Pause Track' : 'Play Music Track' }}
+                    {{ isPlaying ? 'Stop Diagnostic' : 'Start Diagnostic' }}
                   </button>
                 </div>
               </div>
@@ -192,7 +192,7 @@ import {
       </main>
 
       <footer class="footer">
-        <p>Built with Angular & Motion JS. 100% custom spring equations.</p>
+        <p>Built with Angular and Motion. Custom spring equations for premium UI physics.</p>
       </footer>
     </div>
 
@@ -251,39 +251,43 @@ import {
       gap: 1rem;
     }
 
-    .logo-icon {
-      font-size: 2.5rem;
+    .logo-text-icon {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-color);
       background: var(--card-bg);
-      padding: 0.5rem;
-      border-radius: 16px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
       border: 1px solid var(--card-border);
       transition: background 0.3s ease, border-color 0.3s ease;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 700;
       letter-spacing: -0.025em;
-      background: linear-gradient(to right, var(--text-color), var(--text-muted));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-color);
       transition: color 0.3s ease;
     }
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       margin-top: 0.25rem;
       transition: color 0.3s ease;
     }
 
     .badge {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
-      border: 1px solid rgba(99, 102, 241, 0.25);
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+      border: 1px solid rgba(99, 102, 241, 0.2);
       padding: 0.4rem 1rem;
       border-radius: 9999px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -306,7 +310,7 @@ import {
     }
 
     h2 {
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
       color: var(--text-color);
@@ -314,7 +318,7 @@ import {
     }
 
     h3 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 500;
       margin-bottom: 1rem;
       color: var(--text-color);
@@ -323,7 +327,7 @@ import {
 
     .panel-desc {
       color: var(--text-muted);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       margin-bottom: 1.5rem;
       transition: color 0.3s ease;
     }
@@ -334,7 +338,7 @@ import {
 
     .control-group label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -358,7 +362,7 @@ import {
       border: none;
       color: var(--text-muted);
       padding: 0.5rem;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 500;
       border-radius: 8px;
       cursor: pointer;
@@ -379,8 +383,8 @@ import {
       border-radius: 10px;
       color: var(--text-color);
       font-family: var(--font-family);
-      padding: 0.7rem 1rem;
-      font-size: 0.9rem;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.85rem;
       outline: none;
       transition: border-color 0.2s ease, background 0.3s ease, color 0.3s ease;
     }
@@ -397,7 +401,7 @@ import {
 
     .offset-inputs span {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #64748b;
       margin-bottom: 0.25rem;
     }
@@ -443,8 +447,8 @@ import {
       color: #f87171;
     }
     .danger-text:hover {
-      background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.15);
     }
 
     /* Island cards layout */
@@ -468,7 +472,7 @@ import {
     }
 
     .island-card h4 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--text-color);
       margin-bottom: 0.25rem;
@@ -498,7 +502,7 @@ import {
       margin-top: 5rem;
       padding: 2rem 0;
       color: var(--text-muted);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       border-top: 1px solid var(--card-border);
       transition: border-color 0.3s ease, color 0.3s ease;
     }
@@ -543,58 +547,58 @@ export class App {
 
   // Action methods
   triggerSuccess() {
-    this.toastService.success('Task Completed Successfully', {
-      description: 'Your changes have been correctly saved to the centralized repository.',
+    this.toastService.success('Database sync complete', {
+      description: 'All local transactions successfully synchronized with replica-us-east.',
       duration: 4000
     });
   }
 
   triggerError() {
-    this.toastService.error('Build Verification Failed', {
-      description: 'The unit tests failed with exit code 1. Check compiler logs.',
+    this.toastService.error('Deployment failed', {
+      description: 'Production deploy failed at step "Build Assets" due to webpack exit code 1.',
       duration: 5000
     });
   }
 
   triggerInfo() {
-    this.toastService.info('Update Available', {
-      description: 'A newer stable version (v1.4.2) of this toast library is available.',
+    this.toastService.info('System maintenance', {
+      description: 'Scheduled maintenance will commence on Sunday at 02:00 UTC.',
       duration: 4000
     });
   }
 
   triggerWarning() {
-    this.toastService.warning('High Resource Latency', {
-      description: 'We are noticing slower response times from your database region.',
+    this.toastService.warning('API Rate limits', {
+      description: 'Client requests have reached 85% of allowed volume for the current window.',
       duration: 4500
     });
   }
 
   triggerLoading() {
-    const toastId = this.toastService.loading('Syncing files to server...', {
-      description: 'Uploading asset bundles (48%)'
+    const toastId = this.toastService.loading('Compiling code bundle...', {
+      description: 'Optimizing tree-shaking modules (48%)'
     });
 
     // Simulate completion
     setTimeout(() => {
       this.toastService.update(toastId, {
         state: 'success',
-        title: 'Assets Synchronized',
-        description: 'Successfully uploaded 4 files in 1.8s.',
+        title: 'Bundle compiled',
+        description: 'Production build complete. Output size is 142KB.',
         duration: 3000
       });
     }, 2000);
   }
 
   triggerActionToast() {
-    const toastId = this.toastService.success('Conversation Deleted', {
-      description: 'You can restore this within the next 30 days.',
+    const toastId = this.toastService.success('Record removed', {
+      description: 'Transaction #89284 has been successfully archived.',
       duration: 6000,
       button: {
-        title: 'Undo Action',
+        title: 'Undo',
         onClick: () => {
-          this.toastService.info('Deletion Cancelled', {
-            description: 'The conversation was completely restored.',
+          this.toastService.info('Action reverted', {
+            description: 'Transaction #89284 has been restored to active database ledger.',
             duration: 3000
           });
           this.toastService.dismiss(toastId);
@@ -632,25 +636,25 @@ export class App {
     setTimeout(() => {
       this.toastService.update(islandToastId, {
         state: 'success',
-        title: 'Successfully Saved',
-        description: 'Document compiled & synchronized.',
+        title: 'Configuration saved',
+        description: 'Global system variables written to cloud vault.',
         duration: 2500
       });
     }, 2500);
   }
 
   runConfirmationPrompt() {
-    const confirmToastId = this.toastService.warning('Confirm Account Deletion?', {
+    const confirmToastId = this.toastService.warning('Confirm delete environment?', {
       anchorId: 'confirm-island',
-      description: 'This operation is absolute and cannot be undone.',
+      description: 'All stack resources will be permanently removed.',
       duration: 999999, // Keep open for interaction
       button: {
         title: 'Confirm',
         onClick: () => {
           this.toastService.update(confirmToastId, {
             state: 'success',
-            title: 'Account Scheduled for Deletion',
-            description: 'Data purging process started.',
+            title: 'Environment stack deleted',
+            description: 'Resources released.',
             duration: 3000
           });
         }
@@ -662,21 +666,21 @@ export class App {
     this.isPlaying = !this.isPlaying;
 
     if (this.isPlaying) {
-      this.toastService.info('Now Playing: "Starlight Spring"', {
+      this.toastService.info('Running diagnostic suite...', {
         anchorId: 'music-island',
-        description: 'Vibe & Coding playlist • 03:42 remaining',
-        duration: 5000,
+        description: 'Latency check: 14ms • Thread: 12% • Node active',
+        duration: 999999, // Persist while active
         button: {
-          title: 'Pause',
+          title: 'Stop',
           onClick: () => {
             this.toggleMusicPlayback();
           }
         }
       });
     } else {
-      this.toastService.info('Music Playback Paused', {
+      this.toastService.info('Diagnostic suite stopped', {
         anchorId: 'music-island',
-        description: 'Vibe playlist',
+        description: 'Gateway telemetry connection suspended.',
         duration: 2500
       });
     }

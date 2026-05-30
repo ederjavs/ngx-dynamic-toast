@@ -1,6 +1,6 @@
 {
   "name": "ngx-dynamic-toast",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "description": "Dynamic toast notifications for Angular",
   "repository": {
     "type": "git",
@@ -12,11 +12,22 @@
   "homepage": "https://github.com/ederjavs/ngx-dynamic-toast#readme",
   "author": "ederjavs",
   "license": "MIT",
+  "keywords": [
+    "angular",
+    "toast",
+    "notification",
+    "dynamic-island",
+    "motion",
+    "spring",
+    "sileo",
+    "ngx",
+    "ui"
+  ],
   "peerDependencies": {
-    "@angular/common": "^21.1.0",
-    "@angular/core": "^21.1.0",
-    "@angular/platform-browser": "^21.1.0",
-    "motion": "^12.0.0"
+    "@angular/common": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
+    "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
+    "@angular/platform-browser": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
+    "motion": "^11.0.0 || ^12.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
