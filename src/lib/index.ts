@@ -7,14 +7,9 @@ import {
 import type { DynamicToastConfig } from "./types";
 import { DynamicToastService } from "./dynamic-toast.service";
 import { registerDynamicToast } from "./toast";
-import { SileoToastService } from "../sileo-toast/sileo-toast.service";
 
 export function provideDynamicToast(config: DynamicToastConfig = {}): EnvironmentProviders {
   return makeEnvironmentProviders([
-    {
-      provide: SileoToastService,
-      useExisting: DynamicToastService,
-    },
     {
       provide: APP_INITIALIZER,
       useFactory: () => {
@@ -31,4 +26,5 @@ export function provideDynamicToast(config: DynamicToastConfig = {}): Environmen
 
 export { DynamicToastService } from "./dynamic-toast.service";
 export { dynamicToast } from "./toast";
+export { DynamicIslandDirective } from "./dynamic-island.directive";
 export * from "./types";

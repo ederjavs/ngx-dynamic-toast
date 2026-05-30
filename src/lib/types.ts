@@ -48,6 +48,8 @@ export interface DynamicToastOptions {
   roundness?: number;
   styles?: DynamicToastStyles;
   className?: string;
+  /** ID of a Dynamic Island anchor element to attach this toast to */
+  anchorId?: string;
 }
 
 export interface DynamicToastItem extends DynamicToastOptions {
@@ -59,10 +61,13 @@ export interface DynamicToastItem extends DynamicToastOptions {
   autoCollapseDelayMs?: number;
 }
 
+export type DynamicToastTheme = "light" | "dark" | "system";
+
 export interface DynamicToastConfig {
   position?: DynamicToastPosition;
   offset?: DynamicToastOffsetValue | DynamicToastOffsetConfig;
   options?: Partial<DynamicToastOptions>;
+  theme?: DynamicToastTheme;
 }
 
 export interface DynamicToastPromiseOptions<T = unknown> {
@@ -72,4 +77,3 @@ export interface DynamicToastPromiseOptions<T = unknown> {
   action?: DynamicToastOptions | ((data: T) => DynamicToastOptions);
   position?: DynamicToastPosition;
 }
-

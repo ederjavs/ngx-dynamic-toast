@@ -1,3 +1,5 @@
+/* ================================ Variables ================================ */
+
 [data-dt-viewport] {
   --sileo-spring-easing: linear(
     0,
@@ -47,6 +49,8 @@
   --sileo-state-action: oklch(0.623 0.214 259.815);
 }
 
+/* =================================== Toast ================================= */
+
 [data-dt-toast] {
   position: relative;
   cursor: pointer;
@@ -63,146 +67,7 @@
   contain: layout style;
   overflow: visible;
   color: #ffffff;
-  transition: all var(--sileo-duration) var(--sileo-spring-easing);
-  /* Stronger shadow for stacking depth */
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))
-    drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
 }
-
-/* --- PROGRESS BAR (Feedback Visual) --- */
-/* REMOVED as per request */
-[data-dt-toast]::after {
-  display: none !important;
-}
-
-/* --- STACKING LOGIC (Sonner-like) --- */
-
-/* Default State (Not Hovering Viewport): Stacked */
-[data-dt-viewport]:not(:hover) [data-dt-toast] {
-  position: absolute;
-  /* Add consistent spacing/air - Increased to 1.5rem to match Sileo look */
-  right: 1.5rem;
-  margin: 0 !important;
-  transition: all 600ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Specific handling for left/center alignment */
-[data-dt-viewport][data-position$="left"]:not(:hover) [data-dt-toast] {
-  right: auto;
-  left: 1.5rem;
-}
-[data-dt-viewport][data-position^="top"]:not(:hover) [data-dt-toast] {
-  top: 1.5rem !important;
-}
-[data-dt-viewport][data-position^="bottom"]:not(:hover) [data-dt-toast] {
-  bottom: 1.5rem !important;
-}
-[data-dt-viewport][data-position$="center"]:not(:hover) [data-dt-toast] {
-  right: auto;
-  left: auto;
-  /* center is handled by flex align-items: center on parent */
-  position: relative; /* Stacking might be tricky centered, fallback to relative */
-  margin-bottom: -30px !important; /* Overlap manually */
-}
-
-/* Top Position Stacking */
-[data-dt-viewport][data-position^="top"]:not(:hover) [data-dt-toast] {
-  top: 1.5rem !important; /* Force margin from top */
-  /* Reverse index logic logic handled below via nth-last-child */
-}
-
-[data-dt-viewport][data-position^="bottom"]:not(:hover) [data-dt-toast] {
-  bottom: 1.5rem !important;
-}
-
-/* Stacking Depth Logic - Up to 3 visible */
-/* The LAST element is the NEWEST (top of stack) */
-[data-dt-viewport]:not(:hover)
-  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
-    1
-  ) {
-  z-index: 5;
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-
-[data-dt-viewport][data-position^="top"]:not(:hover)
-  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
-    2
-  ) {
-  z-index: 4;
-  transform: translateY(-14px) scale(0.95);
-  opacity: 1;
-  filter: brightness(0.9);
-}
-
-[data-dt-viewport][data-position^="bottom"]:not(:hover)
-  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
-    2
-  ) {
-  z-index: 4;
-  transform: translateY(14px) scale(0.95);
-  opacity: 1;
-  filter: brightness(0.9);
-}
-
-[data-dt-viewport][data-position^="top"]:not(:hover)
-  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
-    3
-  ) {
-  z-index: 3;
-  transform: translateY(-28px) scale(0.9);
-  opacity: 0.8;
-  filter: brightness(0.8);
-}
-
-[data-dt-viewport][data-position^="bottom"]:not(:hover)
-  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
-    3
-  ) {
-  z-index: 3;
-  transform: translateY(28px) scale(0.9);
-  opacity: 0.8;
-  filter: brightness(0.8);
-}
-
-/* Hide deeper toasts */
-[data-dt-viewport]:not(:hover)
-  [data-dt-toast][data-ready="true"]:not([data-exiting="true"]):nth-last-child(
-    n + 4
-  ) {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(0) scale(0.8);
-  z-index: 0;
-}
-
-/* --- EXPANDED STATE (Hovering Viewport) --- */
-[data-dt-viewport]:hover [data-dt-toast] {
-  position: relative; /* Return to flow */
-  transform: none; /* No scaling/translation */
-  opacity: 1;
-  filter: none;
-  z-index: auto;
-  /* Add gap spacing via margin since we can't use gap property easily with mixed positioning transitions */
-}
-
-/* Add spacing in expanded mode */
-[data-dt-viewport][data-position^="top"]:hover
-  [data-dt-toast]
-  + [data-dt-toast] {
-  margin-top: 10px;
-}
-[data-dt-viewport][data-position^="bottom"]:hover
-  [data-dt-toast]
-  + [data-dt-toast] {
-  margin-bottom: 10px;
-}
-/* Re-order for top: newest (last) should be visually first? 
-   No, usually lists are oldest top, newest bottom. 
-   Or Newest Top.
-   If flex-col-reverse is used, DOM order is reversed visually.
-*/
 
 [data-dt-toast][data-state="loading"] {
   cursor: default;
@@ -219,24 +84,24 @@
     height var(--sileo-duration) var(--sileo-spring-easing);
 }
 
+/* Entry animation direction */
+[data-dt-viewport][data-position^="top"]
+  [data-dt-toast]:not([data-ready="true"]) {
+  transform: translateY(-6px) scale(0.95);
+}
+
+[data-dt-viewport][data-position^="bottom"]
+  [data-dt-toast]:not([data-ready="true"]) {
+  transform: translateY(6px) scale(0.95);
+}
+
+/* Exit */
 [data-dt-toast][data-ready="true"][data-exiting="true"] {
-  opacity: 0 !important;
+  opacity: 0;
   pointer-events: none;
 }
 
 [data-dt-viewport][data-position^="top"]
-  [data-dt-toast]:not([data-ready="true"]) {
-  transform: translateY(-6px) scale(0.95);
-  opacity: 0 !important;
-}
-
-[data-dt-viewport][data-position^="bottom"]
-  [data-dt-toast]:not([data-ready="true"]) {
-  transform: translateY(6px) scale(0.95);
-  opacity: 0 !important;
-}
-
-[data-dt-viewport][data-position^="top"]
   [data-dt-toast][data-ready="true"][data-exiting="true"] {
   transform: translateY(-6px) scale(0.95);
 }
@@ -245,6 +110,8 @@
   [data-dt-toast][data-ready="true"][data-exiting="true"] {
   transform: translateY(6px) scale(0.95);
 }
+
+/* ================================== Canvas ================================= */
 
 [data-dt-canvas] {
   position: absolute;
@@ -268,6 +135,21 @@
 [data-dt-svg] {
   overflow: visible;
 }
+
+[data-dt-toast][data-ready="true"] [data-dt-pill] {
+  transition:
+    x var(--sileo-duration) var(--sileo-spring-easing),
+    width var(--sileo-duration) var(--sileo-spring-easing),
+    height var(--sileo-duration) var(--sileo-spring-easing);
+}
+
+[data-dt-toast][data-ready="true"] [data-dt-body] {
+  transition:
+    height var(--sileo-duration) var(--sileo-spring-easing),
+    opacity calc(var(--sileo-duration) * 0.8) var(--sileo-spring-easing);
+}
+
+/* ================================== Header ================================= */
 
 [data-dt-header] {
   position: absolute;
@@ -321,6 +203,11 @@
     both;
 }
 
+[data-dt-header-inner][data-exiting="true"],
+[data-dt-header-inner][data-layer="current"]:not(:only-child) {
+  will-change: opacity, filter;
+}
+
 [data-dt-header-inner][data-layer="prev"] {
   position: absolute;
   left: 0;
@@ -332,6 +219,8 @@
 [data-dt-header-inner][data-exiting="true"] {
   animation: dt-header-exit calc(var(--sileo-duration) * 0.7) ease forwards;
 }
+
+/* ================================== Badge ================================== */
 
 [data-dt-badge] {
   display: flex;
@@ -354,6 +243,8 @@
   text-transform: capitalize;
   color: var(--sileo-tone, currentColor);
 }
+
+/* ================================ State Colors ============================= */
 
 :is([data-dt-badge], [data-dt-title], [data-dt-button])[data-state] {
   --_c: var(--sileo-state-success);
@@ -383,6 +274,8 @@
   --sileo-tone: var(--_c);
   --sileo-tone-bg: color-mix(in oklch, var(--_c) 20%, transparent);
 }
+
+/* ================================== Content ================================ */
 
 [data-dt-content] {
   position: absolute;
@@ -429,6 +322,8 @@
   content-visibility: auto;
 }
 
+/* ================================== Button ================================= */
+
 [data-dt-button] {
   display: flex;
   align-items: center;
@@ -455,6 +350,8 @@
   --sileo-btn-bg: color-mix(in oklch, var(--_c) 15%, transparent);
   --sileo-btn-bg-hover: color-mix(in oklch, var(--_c) 25%, transparent);
 }
+
+/* ================================ Animations =============================== */
 
 [data-dt-icon="spin"] {
   animation: dt-spin 1s linear infinite;
@@ -488,42 +385,22 @@
   }
 }
 
+/* ================================= Viewport ================================ */
+
 [data-dt-viewport] {
   position: fixed;
   z-index: 50;
   display: flex;
-  gap: 0; /* Handled via margins/stacking */
-  padding: 1.5rem; /* Increased padding for expanded state */
-  /* pointer-events: none; REMOVED to allow hover on viewport */
-  pointer-events: auto;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  pointer-events: none;
   max-width: calc(100vw - 1.5rem);
   contain: layout style;
-  transition: all 300ms ease;
-  height: auto;
 }
 
-/* Ensure viewport doesn't block clicks when empty or not hovering, 
-   but we need pointer-events auto for the hover to work. 
-   Actually, if we put pointer-events: none on viewport, hover won't trigger.
-   But if we put auto, it blocks clicks underneath.
-   Solution: pointer-events: none on viewport, auto on toasts.
-   BUT then viewport:hover won't work easily if gaps are empty.
-   Compromise: pointer-events: none, but use a large invisible capture area or 
-   rely on hovering a toast to trigger expansion of siblings?
-   Standard implementation: The stack is small, blocking a small area is fine.
-*/
-[data-dt-viewport] {
-  pointer-events: none; /* Default to pass-through */
-}
 [data-dt-toast] {
-  pointer-events: auto; /* Items capture clicks */
+  pointer-events: auto;
 }
-/* We need the viewport to capture hover to expand stack. 
-   If pointer-events is none, hover doesn't bubble from children to parent in a way that triggers :hover styles on parent 
-   if the cursor is strictly over a child? Yes it does.
-   Hovering a child triggers hover on parent.
-   So pointer-events: none on viewport + auto on children works for expanding when touching a toast.
-*/
 
 [data-dt-viewport][data-position^="top"]
   [data-dt-toast]:not([data-ready="true"]) {
@@ -561,6 +438,20 @@
   align-items: center;
 }
 
+/* ================================== Themes ================================= */
+
+/* Dark theme: light description text on dark fill */
+[data-dt-viewport][data-theme="dark"] [data-dt-description] {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Light theme: dark description text on light fill */
+[data-dt-viewport][data-theme="light"] [data-dt-description] {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================== Reduced Motion ============================= */
+
 @media (prefers-reduced-motion: no-preference) {
   [data-dt-toast][data-ready="true"]:hover,
   [data-dt-toast][data-ready="true"][data-exiting="true"] {
@@ -577,4 +468,31 @@
     animation-iteration-count: 1;
     transition-duration: 0.01ms;
   }
+}
+
+/* ============================== Dynamic Island ============================= */
+
+[data-dt-island] {
+  position: relative;
+  display: inline-block;
+}
+
+[data-dt-island-container] {
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+[data-dt-island-container][data-expand="bottom"] {
+  top: 0;
+}
+
+[data-dt-island-container][data-expand="top"] {
+  bottom: 0;
+}
+
+[data-dt-island-container] [data-dt-toast] {
+  pointer-events: auto;
 }

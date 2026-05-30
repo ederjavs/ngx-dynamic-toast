@@ -8,12 +8,11 @@
   [attr.data-position]="pillAlign()"
   [attr.data-state]="view().state"
   [class]="toast().className || ''"
-  [style.--_h]="HEIGHT + 'px'"
-  [style.--_pw]="(pillWidth() || HEIGHT) + 'px'"
+  [style.--_h]="rootHeight() + 'px'"
+  [style.--_pw]="resolvedPillWidth() + 'px'"
   [style.--_px]="pillX() + 'px'"
   [style.--_ht]="headerTransform()"
   [style.--_co]="open() ? 1 : 0"
-  [style.animation-duration]="(toast().duration || 6000) + 'ms'"
   (mouseenter)="handleEnter()"
   (mouseleave)="handleLeave()"
   (transitionend)="handleTransitionEnd($event)"
@@ -30,6 +29,7 @@
       [attr.height]="svgHeight()"
       [attr.viewBox]="'0 0 ' + WIDTH + ' ' + svgHeight()"
     >
+      <title>Toast Notification</title>
       <defs>
         <filter
           [id]="filterId"
@@ -54,44 +54,59 @@
         </filter>
       </defs>
 
-      <path
+      <!-- Pill: animated <rect> via Motion -->
+      <rect
+        #pillRect
         data-dt-pill
-        [attr.d]="pillPath()"
+        [attr.rx]="resolvedRoundness()"
+        [attr.ry]="resolvedRoundness()"
         [attr.fill]="view().fill"
+        y="0"
+        [style.x.px]="pillX()"
+        [style.width.px]="resolvedPillWidth()"
+        [style.height.px]="open() ? pillHeight() : HEIGHT"
       />
 
-      <path
+      <!-- Body: animated <rect> via Motion -->
+      <rect
+        #bodyRect
         data-dt-body
-        [attr.d]="bodyPath()"
+        [attr.y]="HEIGHT"
+        [attr.width]="WIDTH"
+        [attr.rx]="resolvedRoundness()"
+        [attr.ry]="resolvedRoundness()"
         [attr.fill]="view().fill"
-        [attr.opacity]="open() ? 1 : 0"
+        [style.height.px]="open() ? expandedContent() : 0"
+        [style.opacity]="open() ? 1 : 0"
       />
     </svg>
   </div>
 
-  <div #headerRef data-dt-header [attr.data-edge]="expandEdge()">
+  <div data-dt-header [attr.data-edge]="expandEdge()">
     <div data-dt-header-stack>
+      <!-- Current header layer -->
       <div
-        #innerRef
         data-dt-header-inner
         data-layer="current"
+        [attr.key]="headerLayerCurrent().key"
       >
         <div
           data-dt-badge
-          [attr.data-state]="view().state"
-          [class]="view().styles?.badge || ''"
-          [innerHTML]="resolvedIcon(view())"
+          [attr.data-state]="headerLayerCurrent().view.state"
+          [class]="headerLayerCurrent().view.styles?.badge || ''"
+          [innerHTML]="resolvedIcon(headerLayerCurrent().view)"
         ></div>
         <span
           data-dt-title
-          [attr.data-state]="view().state"
-          [class]="view().styles?.title || ''"
+          [attr.data-state]="headerLayerCurrent().view.state"
+          [class]="headerLayerCurrent().view.styles?.title || ''"
         >
-          {{ view().title }}
+          {{ headerLayerCurrent().view.title }}
         </span>
       </div>
 
-      <!-- @if (headerLayerPrev(); as prev) {
+      <!-- Previous header layer (crossfade exit) -->
+      @if (headerLayerPrev(); as prev) {
         <div data-dt-header-inner data-layer="prev" data-exiting="true">
           <div
             data-dt-badge
@@ -107,7 +122,7 @@
             {{ prev.view.title }}
           </span>
         </div>
-      } -->
+      }
     </div>
   </div>
 
@@ -118,7 +133,6 @@
       [attr.data-visible]="open()"
     >
       <div
-        #contentRef
         data-dt-description
         [class]="view().styles?.description || ''"
       >
@@ -145,4 +159,3 @@
     </div>
   }
 </button>
-

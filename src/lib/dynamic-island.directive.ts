@@ -1,0 +1,170 @@
+import {
+  Directive,
+  ElementRef,
+  inject,
+  input,
+  OnInit,
+  OnDestroy,
+  Renderer2,
+  ComponentRef,
+  ViewContainerRef,
+  computed,
+  effect,
+  signal,
+  ChangeDetectorRef,
+  NgZone,
+  Injector
+} from "@angular/core";
+import { DynamicToastService } from "./dynamic-toast.service";
+import { DynamicToastComponent } from "./dynamic-toast.component";
+import type { DynamicToastItem, DynamicToastTheme } from "./types";
+
+@Directive({
+  selector: "[dtDynamicIsland]",
+  standalone: true,
+})
+export class DynamicIslandDirective implements OnInit, OnDestroy {
+  /** The ID used to match toasts to this island anchor */
+  dtIslandId = input.required<string>();
+
+  /** Direction the toast expands: 'bottom' (default) or 'top' */
+  dtIslandExpand = input<"top" | "bottom">("bottom");
+
+  /** Theme override for this island */
+  dtIslandTheme = input<DynamicToastTheme>("dark");
+
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly service = inject(DynamicToastService);
+  private readonly renderer = inject(Renderer2);
+  private readonly vcr = inject(ViewContainerRef);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly ngZone = inject(NgZone);
+  private readonly injector = inject(Injector);
+
+  private container: HTMLElement | null = null;
+  private toastCompRef: ComponentRef<DynamicToastComponent> | null = null;
+  private ro: ResizeObserver | null = null;
+
+  /** Current toast bound to this island */
+  private currentToast = signal<DynamicToastItem | null>(null);
+
+  ngOnInit() {
+    // Register this anchor with the service
+    this.service.registerAnchor(this.dtIslandId(), this.el);
+
+    // Mark the host element
+    this.renderer.setAttribute(
+      this.el.nativeElement,
+      "data-dt-island",
+      this.dtIslandId(),
+    );
+
+    // Create the overlay container
+    this.container = this.renderer.createElement("div");
+    this.renderer.setAttribute(this.container, "data-dt-island-container", "");
+    this.renderer.setAttribute(
+      this.container,
+      "data-expand",
+      this.dtIslandExpand(),
+    );
+    this.renderer.setAttribute(
+      this.container,
+      "data-theme",
+      this.dtIslandTheme(),
+    );
+
+    // Insert container as sibling after the host
+    const parent = this.el.nativeElement.parentNode;
+    if (parent) {
+      // Wrap host in a relative container if not already
+      const wrapper = this.renderer.createElement("div");
+      this.renderer.setStyle(wrapper, "position", "relative");
+      this.renderer.setStyle(wrapper, "display", "inline-block");
+      parent.insertBefore(wrapper, this.el.nativeElement);
+      wrapper.appendChild(this.el.nativeElement);
+      wrapper.appendChild(this.container!);
+    }
+
+    // Watch for toasts targeting this island
+    effect(() => {
+      const toasts = this.service.toasts();
+      const islandId = this.dtIslandId();
+      const match = toasts.find(
+        (t) => t.anchorId === islandId && !t.exiting,
+      );
+      const exiting = toasts.find(
+        (t) => t.anchorId === islandId && t.exiting,
+      );
+
+      this.ngZone.runOutsideAngular(() => {
+        queueMicrotask(() => {
+          if (match) {
+            this.showToast(match);
+          } else if (exiting) {
+            this.updateToast(exiting);
+          } else {
+            this.hideToast();
+          }
+        });
+      });
+    }, { injector: this.injector });
+
+    // Observe anchor size changes to update pill width
+    this.ro = new ResizeObserver(() => {
+      this.updateContainerPosition();
+    });
+    this.ro.observe(this.el.nativeElement);
+  }
+
+  private showToast(item: DynamicToastItem) {
+    if (!this.container) return;
+
+    if (!this.toastCompRef) {
+      this.toastCompRef = this.vcr.createComponent(DynamicToastComponent);
+      this.container.appendChild(
+        this.toastCompRef.location.nativeElement,
+      );
+
+      // Subscribe to dismiss
+      this.toastCompRef.instance.dismissed.subscribe((id: string) => {
+        this.service.dismiss(id);
+      });
+    }
+
+    // Update inputs
+    this.toastCompRef.setInput("toast", item);
+    this.toastCompRef.setInput("pillAlign", "center");
+    this.toastCompRef.setInput("expandEdge", this.dtIslandExpand());
+    this.toastCompRef.setInput("canExpand", true);
+
+    this.toastCompRef.changeDetectorRef.detectChanges();
+    this.updateContainerPosition();
+  }
+
+  private updateToast(item: DynamicToastItem) {
+    if (!this.toastCompRef) return;
+    this.toastCompRef.setInput("toast", item);
+    this.toastCompRef.changeDetectorRef.detectChanges();
+  }
+
+  private hideToast() {
+    if (this.toastCompRef) {
+      this.toastCompRef.destroy();
+      this.toastCompRef = null;
+    }
+  }
+
+  private updateContainerPosition() {
+    if (!this.container) return;
+    // Container is already positioned via CSS (absolute, centered)
+    // The width of the toast should adapt to at least the anchor width
+    const anchorWidth = this.el.nativeElement.offsetWidth;
+    this.container.style.minWidth = `${anchorWidth}px`;
+  }
+
+  ngOnDestroy() {
+    this.service.unregisterAnchor(this.dtIslandId());
+    this.ro?.disconnect();
+    this.hideToast();
+  }
+}

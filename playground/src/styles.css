@@ -1,0 +1,178 @@
+/* Global styles and modern theme design variables */
+:root {
+  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+}
+
+body.light-theme {
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+  --text-color: #0f172a;
+  --text-muted: #475569;
+  --panel-bg: rgba(255, 255, 255, 0.7);
+  --panel-border: rgba(0, 0, 0, 0.08);
+  --shadow-color: rgba(15, 23, 42, 0.08);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --input-border: rgba(0, 0, 0, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.5);
+  --card-border: rgba(0, 0, 0, 0.05);
+  --header-border: rgba(0, 0, 0, 0.06);
+  --theme-btn-bg: rgba(0, 0, 0, 0.05);
+  --theme-btn-active: #ffffff;
+  --theme-btn-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --btn-secondary-bg: rgba(0, 0, 0, 0.04);
+  --btn-secondary-border: rgba(0, 0, 0, 0.08);
+  --btn-secondary-text: #334155;
+  --blob-opacity: 0.12;
+}
+
+body.dark-theme {
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
+  --text-color: #f8fafc;
+  --text-muted: #94a3b8;
+  --panel-bg: rgba(30, 41, 59, 0.4);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --input-bg: rgba(0, 0, 0, 0.25);
+  --input-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(0, 0, 0, 0.15);
+  --card-border: rgba(255, 255, 255, 0.04);
+  --header-border: rgba(255, 255, 255, 0.05);
+  --theme-btn-bg: rgba(0, 0, 0, 0.2);
+  --theme-btn-active: rgba(255, 255, 255, 0.1);
+  --theme-btn-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+  --btn-secondary-border: rgba(255, 255, 255, 0.1);
+  --btn-secondary-text: #ffffff;
+  --blob-opacity: 0.15;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-color);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px -10px var(--shadow-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: var(--panel-border);
+  box-shadow: 0 20px 40px -15px var(--shadow-color);
+}
+
+/* Buttons */
+.btn {
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.6);
+}
+
+.btn-success {
+  background: #10b981;
+  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);
+}
+
+.btn-success:hover {
+  background: #059669;
+  box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.6);
+}
+
+.btn-danger {
+  background: #ef4444;
+  box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.6);
+}
+
+.btn-warning {
+  background: #f59e0b;
+  box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.4);
+  color: #0f172a;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+  box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.6);
+}
+
+.btn-info {
+  background: #06b6d4;
+  box-shadow: 0 4px 14px 0 rgba(6, 182, 212, 0.4);
+}
+
+.btn-info:hover {
+  background: #0891b2;
+  box-shadow: 0 6px 20px 0 rgba(6, 182, 212, 0.6);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-border);
+  color: var(--btn-secondary-text);
+}
+
+.btn-secondary:hover {
+  background: var(--btn-secondary-bg);
+  opacity: 0.85;
+}
+
+/* Dynamic Island anchor wrapper styling compatibility */
+.island-anchor {
+  position: relative;
+  display: inline-block;
+  z-index: 10;
+}

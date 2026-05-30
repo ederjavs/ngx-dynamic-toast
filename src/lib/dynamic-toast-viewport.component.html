@@ -2,6 +2,7 @@
   <section
     data-dt-viewport
     [attr.data-position]="group.pos"
+    [attr.data-theme]="resolvedTheme()"
     aria-live="polite"
     [style.top]="group.style?.top"
     [style.right]="group.style?.right"
@@ -21,4 +22,3 @@
     }
   </section>
 }
-

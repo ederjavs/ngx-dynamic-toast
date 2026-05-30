@@ -8,11 +8,13 @@ import {
   input,
   output,
   signal,
-  ViewEncapsulation,
   untracked,
+  ViewEncapsulation,
   OnDestroy,
   NgZone,
   ChangeDetectorRef,
+  AfterViewInit,
+  ViewChild,
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
@@ -23,6 +25,7 @@ import {
   HEIGHT,
   MIN_EXPAND_RATIO,
   PILL_PADDING,
+  SPRING,
   SWAP_COLLAPSE_MS,
   WIDTH,
 } from "./constants";
@@ -60,7 +63,7 @@ interface HeaderLayer {
   encapsulation: ViewEncapsulation.None,
   templateUrl: "./dynamic-toast.component.html",
 })
-export class DynamicToastComponent implements OnDestroy {
+export class DynamicToastComponent implements AfterViewInit, OnDestroy {
   toast = input.required<DynamicToastItem>();
   pillAlign = input<PillAlign>("left");
   expandEdge = input<ExpandEdge>("bottom");
@@ -85,53 +88,30 @@ export class DynamicToastComponent implements OnDestroy {
   private autoExpandTimer: number | null = null;
   private autoCollapseTimer: number | null = null;
   private swapTimer: number | null = null;
-  private lastRefreshKey: string | undefined;
   private pendingSwap: { key?: string; payload: View } | null = null;
   private pointerStartY: number | null = null;
 
+  @ViewChild("pillRect") pillRectRef!: ElementRef<SVGRectElement>;
+  @ViewChild("bodyRect") bodyRectRef!: ElementRef<SVGRectElement>;
+
   ready = signal(false);
-  isExpanded = signal(true); // Default to expanded if description exists
+  isExpanded = signal(false);
   pillWidth = signal(0);
   contentHeight = signal(0);
 
-  // view = signal<View>({
-  //   title: "",
-  //   description: "",
-  //   state: "success",
-  //   iconSvg: null,
-  //   fill: "#FFFFFF",
-  // });
-
-  // Use a default toast state to avoid NG0950 during initialization
-  view = computed<View>(() => {
-    try {
-      const t = this.toast();
-      return {
-        title: t.title,
-        description: t.description,
-        contentTemplate: t.contentTemplate,
-        state: t.state,
-        iconSvg: t.iconSvg,
-        styles: t.styles,
-        button: t.button,
-        fill: t.fill ?? "#151515",
-      };
-    } catch (e) {
-      // Return safe default if input is not yet bound
-      return {
-        title: "",
-        state: "info",
-        fill: "#151515",
-      };
-    }
+  // View as a signal so we can swap it for header crossfade animation
+  view = signal<View>({
+    title: "",
+    state: "info",
+    fill: "#151515",
   });
 
-  // headerLayerCurrent = signal<HeaderLayer>({
-  //   key: "",
-  //   view: this.view(),
-  // });
-
-  // headerLayerPrev = signal<HeaderLayer | null>(null);
+  // Header layer system for crossfade animation
+  headerLayerCurrent = signal<HeaderLayer>({
+    key: "",
+    view: this.view(),
+  });
+  headerLayerPrev = signal<HeaderLayer | null>(null);
 
   filterId = `dt-gooey-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -182,13 +162,17 @@ export class DynamicToastComponent implements OnDestroy {
   expanded = computed(() =>
     this.open() ? this.rawExpanded() : this.frozenExpanded(),
   );
+
   svgHeight = computed(() =>
     this.hasDesc() ? Math.max(this.expanded(), this.minExpanded()) : HEIGHT,
   );
+
   expandedContent = computed(() => Math.max(0, this.expanded() - HEIGHT));
+
   resolvedPillWidth = computed(() =>
     Math.max(this.pillWidth() || HEIGHT, HEIGHT),
   );
+
   pillHeight = computed(() => HEIGHT + this.blur() * 3);
 
   pillX = computed(() => {
@@ -199,59 +183,6 @@ export class DynamicToastComponent implements OnDestroy {
     return 0;
   });
 
-  pillPath = computed(() => {
-    const w = this.resolvedPillWidth();
-    const h = HEIGHT;
-    const r = this.resolvedRoundness();
-    const align = this.pillAlign();
-    const open = this.open();
-    const x = this.pillX();
-
-    // Helper for rounded corner arc relative
-    const arc = (dx: number, dy: number) => `a ${r} ${r} 0 0 1 ${dx} ${dy}`;
-
-    let d = "";
-
-    // Start at Top-Left of the pill (relative to x)
-    // We'll draw in absolute coordinates or relative? Path commands usually absolute M x y is easiest.
-
-    // Top Left Corner
-    d += `M ${x} ${h - r}`; // Start before top-left corner? No, let's start top-left.
-    // Actually, standard rect path:
-    // Move to x, y+r
-    // Arc to x+r, y
-    // Line to x+w-r, y
-    // Arc to x+w, y+r
-    // Line to x+w, y+h-r
-    // Arc to x+w-r, y+h
-    // Line to x+r, y+h
-    // Arc to x, y+h-r
-    // Close
-
-    // Top Left
-    d += `M ${x} ${r} ${arc(r, -r)}`;
-
-    // Top Right
-    d += `L ${x + w - r} 0 ${arc(r, r)}`;
-
-    // Bottom Right
-    if (open && align === "right") {
-      d += `L ${x + w} ${h}`; // Sharp corner
-    } else {
-      d += `L ${x + w} ${h - r} ${arc(-r, r)}`; // Rounded
-    }
-
-    // Bottom Left
-    if (open && align === "left") {
-      d += `L ${x} ${h}`; // Sharp corner
-    } else {
-      d += `L ${x + r} ${h} ${arc(-r, -r)}`; // Rounded
-    }
-
-    d += "Z";
-    return d;
-  });
-
   headerTransform = computed(() => {
     const open = this.open();
     const expand = this.expandEdge();
@@ -260,90 +191,127 @@ export class DynamicToastComponent implements OnDestroy {
     return `translateY(${ty}px) scale(${scale})`;
   });
 
-  bodyPath = computed(() => {
-    const w = WIDTH;
-    const h = this.open() ? this.expandedContent() : 0;
-    const r = this.resolvedRoundness();
-    const y = HEIGHT - 1; // 1px overlap to ensure connection
-    const align = this.pillAlign();
-
-    if (h <= 0) return "";
-
-    // Helper for rounded corner arc
-    // A rx ry x-axis-rotation large-arc-flag sweep-flag x y
-    const arc = (dx: number, dy: number) => `a ${r} ${r} 0 0 1 ${dx} ${dy}`;
-
-    let d = "";
-
-    // Top Left
-    if (align === "left") {
-      d += `M 0 ${y}`; // Sharp corner
-    } else {
-      d += `M 0 ${y + r} ${arc(r, -r)}`; // Rounded start
-    }
-
-    // Top Right
-    if (align === "right") {
-      d += `L ${w} ${y}`; // Sharp line to corner
-    } else {
-      d += `L ${w - r} ${y} ${arc(r, r)}`; // Line then rounded
-    }
-
-    // Bottom Right (Always rounded)
-    d += `L ${w} ${y + h - r} ${arc(-r, r)}`;
-
-    // Bottom Left (Always rounded)
-    d += `L ${r} ${y + h} ${arc(-r, -r)}`;
-
-    // Close path
-    d += "Z";
-
-    return d;
-  });
+  rootHeight = computed(() => (this.open() ? this.expanded() : HEIGHT));
 
   constructor() {
-    // If no description, collapse immediately
+    // Sync view from toast input
     effect(
       () => {
-        if (!this.hasDesc()) {
+        const t = this.toast();
+        console.log('[DynamicToast] View sync effect triggered for:', t.id);
+        const next: View = {
+          title: t.title,
+          description: t.description,
+          contentTemplate: t.contentTemplate,
+          state: t.state,
+          iconSvg: t.iconSvg,
+          styles: t.styles,
+          button: t.button,
+          fill: t.fill ?? "#151515",
+        };
+        this.applyView(next);
+      },
+      { allowSignalWrites: true },
+    );
+
+    // Auto-expand/auto-collapse logic
+    effect(
+      () => {
+        const hasDesc = this.hasDesc();
+        const allowExpand = this.allowExpand();
+        const toast = this.toast();
+        const exiting = toast.exiting;
+
+        console.log('[DynamicToast] Auto-expand effect triggered for:', toast.id, { hasDesc, allowExpand, exiting });
+
+        if (!hasDesc) return;
+        if (exiting || !allowExpand) {
           this.isExpanded.set(false);
+          return;
+        }
+
+        const expandDelay = toast.autoExpandDelayMs;
+        const collapseDelay = toast.autoCollapseDelayMs;
+
+        if (expandDelay == null && collapseDelay == null) return;
+
+        // Clear previous timers
+        if (this.autoExpandTimer) {
+          window.clearTimeout(this.autoExpandTimer);
+          this.autoExpandTimer = null;
+        }
+        if (this.autoCollapseTimer) {
+          window.clearTimeout(this.autoCollapseTimer);
+          this.autoCollapseTimer = null;
+        }
+
+        if (expandDelay != null && expandDelay > 0) {
+          this.autoExpandTimer = window.setTimeout(
+            () => this.isExpanded.set(true),
+            expandDelay,
+          );
         } else {
-          // If has description, start expanded by default
-          // But we might want to respect auto-collapse later
           this.isExpanded.set(true);
+        }
+
+        if (collapseDelay != null && collapseDelay > 0) {
+          this.autoCollapseTimer = window.setTimeout(
+            () => this.isExpanded.set(false),
+            collapseDelay,
+          );
         }
       },
       { allowSignalWrites: true },
     );
 
+    // Freeze expanded height when closing for smooth animation
+    effect(
+      () => {
+        if (this.open()) {
+          this.frozenExpanded.set(this.rawExpanded());
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    // Removed manual motionAnimate calls since CSS handles transitions.
+
+    // Mark ready after first render
     queueMicrotask(() => {
       this.ready.set(true);
       this.ensureMeasurements();
     });
   }
 
-  // private applyView(next: View) {
-  //   const prev = this.view();
-  //   const headerKey = `${next.state}-${next.title}`;
-  //   const prevKey = `${prev.state}-${prev.title}`;
+  ngAfterViewInit() {
+    // No-op since we migrated to CSS transitions
+  }
 
-  //   this.view.set(next);
+  private applyView(next: View) {
+    const prev = untracked(() => this.view());
+    const headerKey = `${next.state}-${next.title}`;
+    const prevKey = `${prev.state}-${prev.title}`;
 
-  //   if (headerKey !== prevKey) {
-  //     const currentLayer: HeaderLayer = { key: headerKey, view: next };
-  //     const prevLayer: HeaderLayer = { key: prevKey, view: prev };
-  //     this.headerLayerPrev.set(prevLayer);
-  //     this.headerLayerCurrent.set(currentLayer);
+    this.view.set(next);
 
-  //     if (this.headerExitTimer) window.clearTimeout(this.headerExitTimer);
-  //     this.headerExitTimer = window.setTimeout(() => {
-  //       this.headerExitTimer = null;
-  //       this.headerLayerPrev.set(null);
-  //     }, HEADER_EXIT_MS);
-  //   } else {
-  //     this.headerLayerCurrent.set({ key: headerKey, view: next });
-  //   }
-  // }
+    if (headerKey !== prevKey) {
+      const currentLayer: HeaderLayer = { key: headerKey, view: next };
+      const prevLayer: HeaderLayer = { key: prevKey, view: prev };
+      this.headerLayerPrev.set(prevLayer);
+      this.headerLayerCurrent.set(currentLayer);
+
+      if (this.headerExitTimer) window.clearTimeout(this.headerExitTimer);
+      this.headerExitTimer = window.setTimeout(() => {
+        this.headerExitTimer = null;
+        this.headerLayerPrev.set(null);
+        this.cdr.detectChanges();
+      }, HEADER_EXIT_MS);
+    } else {
+      this.headerLayerCurrent.set({ key: headerKey, view: next });
+    }
+  }
+
+  // SVG animations are now completely handled by CSS transitions.
 
   ngOnDestroy() {
     this.roHeader?.disconnect();
@@ -370,17 +338,15 @@ export class DynamicToastComponent implements OnDestroy {
     let rafHeader: number | null = null;
     const measureHeader = () => {
       if (rafHeader) return;
-      // Run outside angular to avoid infinite CD loops from RO
       this.ngZone.runOutsideAngular(() => {
         rafHeader = requestAnimationFrame(() => {
           rafHeader = null;
           const cs = getComputedStyle(header);
           const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
           const w = inner.scrollWidth + pad + PILL_PADDING;
-          // Only update if difference is significant to stop 1px loops
           if (Math.abs(w - this.pillWidth()) > 1.5) {
             this.pillWidth.set(w);
-            this.cdr.detectChanges(); // Local detect changes only
+            this.cdr.detectChanges();
           }
         });
       });
@@ -450,7 +416,7 @@ export class DynamicToastComponent implements OnDestroy {
       window.clearTimeout(this.swapTimer);
       this.swapTimer = null;
     }
-    // this.applyView(pending.payload);
+    this.applyView(pending.payload);
     this.pendingSwap = null;
   }
 
@@ -488,7 +454,6 @@ export class DynamicToastComponent implements OnDestroy {
       if (Math.abs(dy) > SWIPE_DISMISS) {
         this.dismissed.emit(this.toast().id);
       } else if (Math.abs(dy) < 5) {
-        // It's a tap
         this.handleTap();
       }
     };
@@ -501,14 +466,11 @@ export class DynamicToastComponent implements OnDestroy {
   private handleTap() {
     if (this.hasDesc()) {
       if (this.isExpanded()) {
-        // 1 click to collapse if it has description and is open
         this.isExpanded.set(false);
       } else {
-        // If already collapsed, another click closes the toast
         this.dismissed.emit(this.toast().id);
       }
     } else {
-      // If no description, a click simply closes it
       this.dismissed.emit(this.toast().id);
     }
   }

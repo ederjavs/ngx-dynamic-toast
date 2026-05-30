@@ -6,10 +6,16 @@ import {
   input,
   signal,
   ViewEncapsulation,
+  OnInit,
+  OnDestroy,
 } from "@angular/core";
 import { DynamicToastComponent } from "./dynamic-toast.component";
 import { DynamicToastService } from "./dynamic-toast.service";
-import type { DynamicToastOffsetConfig, DynamicToastPosition } from "./types";
+import type {
+  DynamicToastOffsetConfig,
+  DynamicToastPosition,
+  DynamicToastTheme,
+} from "./types";
 
 type PillAlign = "left" | "center" | "right";
 type ExpandEdge = "top" | "bottom";
@@ -29,14 +35,30 @@ const expandDir = (pos: DynamicToastPosition): ExpandEdge =>
   templateUrl: "./dynamic-toast-viewport.component.html",
   styleUrls: ["./styles.css"],
 })
-export class DynamicToastViewportComponent {
+export class DynamicToastViewportComponent implements OnInit, OnDestroy {
   position = input<DynamicToastPosition>("top-right");
-  offset = input<DynamicToastOffsetConfig | string | number | undefined>(undefined);
+  offset = input<DynamicToastOffsetConfig | string | number | undefined>(
+    undefined,
+  );
+  theme = input<DynamicToastTheme>("dark");
 
   readonly service = inject(DynamicToastService);
   private hovering = signal(new Set<string>());
+  private systemThemeMql: MediaQueryList | null = null;
+  private systemThemeListener: ((e: MediaQueryListEvent) => void) | null = null;
 
   activeId = signal<string | undefined>(undefined);
+
+  /** Resolved theme (handles 'system' by listening to prefers-color-scheme) */
+  private systemIsDark = signal(true);
+
+  resolvedTheme = computed(() => {
+    const t = this.theme();
+    if (t === "system") {
+      return this.systemIsDark() ? "dark" : "light";
+    }
+    return t;
+  });
 
   private latestId = computed(() => {
     const list = this.service.toasts();
@@ -48,8 +70,10 @@ export class DynamicToastViewportComponent {
 
   groups = computed(() => {
     const toasts = this.service.toasts();
-    const byPos = new Map<DynamicToastPosition, typeof toasts>();
-    for (const t of toasts) {
+    // Filter out toasts that have an anchorId (those go to Dynamic Islands)
+    const viewportToasts = toasts.filter((t) => !t.anchorId);
+    const byPos = new Map<DynamicToastPosition, typeof viewportToasts>();
+    for (const t of viewportToasts) {
       const p = (t.position ?? this.position()) as DynamicToastPosition;
       const arr = byPos.get(p);
       if (arr) arr.push(t);
@@ -69,7 +93,7 @@ export class DynamicToastViewportComponent {
 
     const res: Array<{
       pos: DynamicToastPosition;
-      items: typeof toasts;
+      items: typeof viewportToasts;
       pill: PillAlign;
       expand: ExpandEdge;
       style?: { top?: string; right?: string; bottom?: string; left?: string };
@@ -78,10 +102,12 @@ export class DynamicToastViewportComponent {
     for (const [pos, items] of byPos) {
       const style: any = {};
       if (off) {
-        if (pos.startsWith("top") && off.top !== undefined) style.top = px(off.top);
+        if (pos.startsWith("top") && off.top !== undefined)
+          style.top = px(off.top);
         if (pos.startsWith("bottom") && off.bottom !== undefined)
           style.bottom = px(off.bottom);
-        if (pos.endsWith("left") && off.left !== undefined) style.left = px(off.left);
+        if (pos.endsWith("left") && off.left !== undefined)
+          style.left = px(off.left);
         if (pos.endsWith("right") && off.right !== undefined)
           style.right = px(off.right);
       }
@@ -97,6 +123,27 @@ export class DynamicToastViewportComponent {
 
     return res;
   });
+
+  ngOnInit() {
+    this.service.registerViewport(this);
+    // Listen for system theme changes
+    if (typeof window !== "undefined" && window.matchMedia) {
+      this.systemThemeMql = window.matchMedia("(prefers-color-scheme: dark)");
+      this.systemIsDark.set(this.systemThemeMql.matches);
+      this.systemThemeListener = (e) => this.systemIsDark.set(e.matches);
+      this.systemThemeMql.addEventListener("change", this.systemThemeListener);
+    }
+  }
+
+  ngOnDestroy() {
+    this.service.unregisterViewport(this);
+    if (this.systemThemeMql && this.systemThemeListener) {
+      this.systemThemeMql.removeEventListener(
+        "change",
+        this.systemThemeListener,
+      );
+    }
+  }
 
   onToastEnter(id: string) {
     const next = new Set(this.hovering());

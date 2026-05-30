@@ -1,6 +1,7 @@
 import {
   ApplicationRef,
   ComponentRef,
+  ElementRef,
   EnvironmentInjector,
   Injectable,
   NgZone,
@@ -22,6 +23,7 @@ import {
   DynamicToastPosition,
   DynamicToastPromiseOptions,
   DynamicToastState,
+  DynamicToastTheme,
 } from "./types";
 import { DynamicToastViewportComponent } from "./dynamic-toast-viewport.component";
 
@@ -36,7 +38,7 @@ export class DynamicToastService {
   private _toasts = signal<DynamicToastItem[]>([]);
   readonly toasts = this._toasts.asReadonly();
 
-  private config: DynamicToastConfig = { position: "top-right" };
+  private config: DynamicToastConfig = { position: "top-right", theme: "dark" };
   private viewportRef: ComponentRef<DynamicToastViewportComponent> | null = null;
   private timers = new Map<string, number>();
   private paused = false;
@@ -44,26 +46,58 @@ export class DynamicToastService {
   private loopCount = 0;
   private loopResetTimer: any;
 
+  /** Registry of Dynamic Island anchors */
+  private anchors = new Map<string, ElementRef<HTMLElement>>();
+
   private appRef = inject(ApplicationRef);
   private envInjector = inject(EnvironmentInjector);
   private document = inject(DOCUMENT);
   private ngZone = inject(NgZone);
+
+  private registeredViewport: DynamicToastViewportComponent | null = null;
+
+  registerViewport(cmp: DynamicToastViewportComponent) {
+    this.registeredViewport = cmp;
+  }
+
+  unregisterViewport(cmp: DynamicToastViewportComponent) {
+    if (this.registeredViewport === cmp) {
+      this.registeredViewport = null;
+    }
+  }
 
   configure(cfg: DynamicToastConfig) {
     this.config = { ...this.config, ...cfg };
     if (this.viewportRef) {
       this.viewportRef.setInput("position", this.config.position ?? "top-right");
       this.viewportRef.setInput("offset", this.config.offset);
+      this.viewportRef.setInput("theme", this.config.theme ?? "dark");
     }
   }
 
+  /** Register a Dynamic Island anchor element */
+  registerAnchor(id: string, elementRef: ElementRef<HTMLElement>) {
+    this.anchors.set(id, elementRef);
+  }
+
+  /** Unregister a Dynamic Island anchor element */
+  unregisterAnchor(id: string) {
+    this.anchors.delete(id);
+  }
+
+  /** Get anchor element by ID */
+  getAnchor(id: string): ElementRef<HTMLElement> | undefined {
+    return this.anchors.get(id);
+  }
+
   private ensureViewport() {
-    if (this.viewportRef) return;
+    if (this.viewportRef || this.registeredViewport) return;
     const ref = createComponent(DynamicToastViewportComponent, {
       environmentInjector: this.envInjector,
     });
     ref.setInput("position", this.config.position ?? "top-right");
     ref.setInput("offset", this.config.offset);
+    ref.setInput("theme", this.config.theme ?? "dark");
 
     const el = ref.location.nativeElement;
     el.setAttribute("data-dt-root", "");
@@ -118,8 +152,7 @@ export class DynamicToastService {
   }
 
   private upsert(item: DynamicToastItem) {
-    // console.log("[DynamicToastService] upsert", item.id, item.state);
-
+    console.log('[DynamicToastService] UPSERT called for item:', item.id, item.state);
     // Circuit breaker for infinite loops
     this.loopCount++;
     if (this.loopCount > 50) {
@@ -137,22 +170,20 @@ export class DynamicToastService {
     const currentList = this._toasts();
     const existing = currentList.find((t) => t.id === item.id);
     if (existing && JSON.stringify(existing) === JSON.stringify(item)) {
-        return;
+      return;
     }
 
     this.ensureViewport();
 
-    // Update state outside of Angular Zone to prevent change detection loops
-    // We will manually trigger CD only when necessary
     this.ngZone.runOutsideAngular(() => {
-        this._toasts.update((prev) => {
+      this._toasts.update((prev) => {
         const live = prev.filter((t) => !t.exiting);
         const exist = live.find((t) => t.id === item.id);
         if (exist) {
-            return prev.map((t) => (t.id === item.id ? { ...item } : t));
+          return prev.map((t) => (t.id === item.id ? { ...item } : t));
         }
         return [...prev.filter((t) => t.id !== item.id), item];
-        });
+      });
     });
 
     // Coalesce CD updates to one per frame
@@ -160,9 +191,12 @@ export class DynamicToastService {
       this.isPendingCD = true;
       this.ngZone.runOutsideAngular(() => {
         requestAnimationFrame(() => {
-            this.isPendingCD = false;
-            // Only re-enter zone for CD if really needed, or run detectChanges directly
-            this.viewportRef?.changeDetectorRef.detectChanges();
+          this.isPendingCD = false;
+          if (this.viewportRef) {
+            this.viewportRef.changeDetectorRef.detectChanges();
+          } else if (this.registeredViewport) {
+            // Signal-based components will naturally update, but we can force tick if necessary
+          }
         });
       });
     }
@@ -273,20 +307,24 @@ export class DynamicToastService {
     if (!item || item.exiting) return;
 
     this.ngZone.runOutsideAngular(() => {
-        this._toasts.update((prev) =>
+      this._toasts.update((prev) =>
         prev.map((t) => (t.id === id ? { ...t, exiting: true } : t)),
-        );
+      );
     });
-    
-    this.viewportRef?.changeDetectorRef.detectChanges();
+
+    if (this.viewportRef) {
+      this.viewportRef.changeDetectorRef.detectChanges();
+    }
 
     this.ngZone.runOutsideAngular(() => {
-        window.setTimeout(() => {
+      window.setTimeout(() => {
         this._toasts.update((prev) => prev.filter((t) => t.id !== id));
         this.clearTimers();
         this.scheduleAll();
-        this.viewportRef?.changeDetectorRef.detectChanges();
-        }, EXIT_DURATION);
+        if (this.viewportRef) {
+          this.viewportRef.changeDetectorRef.detectChanges();
+        }
+      }, EXIT_DURATION);
     });
   }
 
@@ -317,30 +355,28 @@ export class DynamicToastService {
   private scheduleAll() {
     if (this.paused) return;
     this.ngZone.runOutsideAngular(() => {
-        const items = this._toasts();
-        for (const item of items) {
+      const items = this._toasts();
+      for (const item of items) {
         if (item.exiting) continue;
         const key = timeoutKey(item);
         if (this.timers.has(key)) continue;
         const dur = item.duration ?? DEFAULT_TOAST_DURATION;
         if (dur === null || dur <= 0) continue;
         this.timers.set(
-            key,
-            window.setTimeout(() => {
-                // Re-enter zone only if needed, but dismiss handles zone internally now
-                this.dismiss(item.id)
-            }, dur),
+          key,
+          window.setTimeout(() => {
+            this.dismiss(item.id);
+          }, dur),
         );
-        }
+      }
 
-        const alive = new Set(items.map(timeoutKey));
-        for (const [key, timer] of this.timers) {
+      const alive = new Set(items.map(timeoutKey));
+      for (const [key, timer] of this.timers) {
         if (!alive.has(key)) {
-            window.clearTimeout(timer);
-            this.timers.delete(key);
+          window.clearTimeout(timer);
+          this.timers.delete(key);
         }
-        }
+      }
     });
   }
 }
-
