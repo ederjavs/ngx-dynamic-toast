@@ -171,7 +171,7 @@
 }
 
 [data-dt-toast]:not([data-state="loading"]) [data-dt-header] {
-  padding-right: 28px;
+  padding-right: 22px;
 }
 
 [data-dt-toast][data-ready="true"] [data-dt-header] {
@@ -202,7 +202,7 @@
   position: absolute;
   z-index: 30;
   top: 10px;
-  left: calc(var(--_px, 0px) + var(--_pw, 350px) - 28px);
+  left: calc(var(--_px, 0px) + var(--_pw, 350px) - 25px);
   display: flex;
   align-items: center;
   justify-content: center;
