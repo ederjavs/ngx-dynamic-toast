@@ -1,0 +1,31 @@
+name: Publish Package to npm
+
+on:
+  release:
+    types: [created] # Se activa automáticamente al crear una Release en GitHub
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Angular Library
+        run: npx ng-packagr -p ng-package.json # Compila la librería
+
+      - name: Publish to npm
+        run: |
+          cd dist/ngx-dynamic-toast # Se posiciona en la carpeta compilada
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Token de autenticación de npm
