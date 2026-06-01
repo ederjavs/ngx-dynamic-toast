@@ -20,27 +20,33 @@ import {
   ],
   template: `
     <div class="app-container">
-      <!-- Ambient decorative gradient shapes -->
-      <div class="blob-1"></div>
-      <div class="blob-2"></div>
-
-      <!-- Main Layout -->
+      <!-- Minimalist Clean Header -->
       <header class="header">
         <div class="logo-area">
           <div class="logo-text-icon">ND</div>
           <div>
-            <h1>ngx-dynamic-toast</h1>
-            <p class="subtitle">Liquid-smooth spring-physics notifications and Dynamic Islands for Angular</p>
+            <h1>ngx-dynamic-toast Playground</h1>
+            <p class="subtitle">Liquid-smooth spring-physics notifications for Angular</p>
           </div>
         </div>
-        <div class="badge">Sileo Fidelity</div>
       </header>
+
+      <!-- Dismissal Instructions -->
+      <section class="instructions-banner">
+        <h3>Dismissal Interactions</h3>
+        <p>This library supports three intuitive ways to close notifications:</p>
+        <ul>
+          <li><strong>Hover Close:</strong> Move your mouse over any active toast to reveal the <strong>&times; Close</strong> button on the right.</li>
+          <li><strong>Tactile Gesture:</strong> Press and swipe up or down (30px threshold) on any active toast to dismiss it.</li>
+          <li><strong>Click Interaction:</strong> Simply click any non-expandable toast, or click the primary action button to dismiss.</li>
+        </ul>
+      </section>
 
       <main class="grid-layout">
         <!-- Configuration Control Panel -->
-        <section class="glass-panel config-panel">
-          <h2>Viewport Configuration</h2>
-          <p class="panel-desc">Customize the global viewport behavior. These configurations apply to non-anchored (generic) toasts.</p>
+        <section class="panel config-panel">
+          <h2>Viewport Settings</h2>
+          <p class="panel-desc">Configure the viewport positioning and theme options.</p>
 
           <div class="control-group">
             <label>Theme</label>
@@ -91,9 +97,9 @@ import {
         </section>
 
         <!-- Standard Toasts Panel -->
-        <section class="glass-panel action-panel">
-          <h2>Telemetry Notifications</h2>
-          <p class="panel-desc">Trigger high-fidelity spring animated toasts with beautiful gooey entry transitions.</p>
+        <section class="panel action-panel">
+          <h2>Standard Notifications</h2>
+          <p class="panel-desc">Trigger spring animated toasts with beautiful entry transitions.</p>
 
           <div class="btn-grid">
             <button class="btn btn-success" (click)="triggerSuccess()">
@@ -135,13 +141,12 @@ import {
         </section>
 
         <!-- Dynamic Island / Element-Anchored Toasts Panel -->
-        <section class="glass-panel action-panel wide-panel">
+        <section class="panel action-panel wide-panel">
           <div class="island-panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
             <div style="flex: 1; min-width: 280px;">
               <h2>Dynamic Island Anchors</h2>
               <p class="panel-desc" style="margin-bottom: 0;">
-                Toasts will warp and expand directly around the DOM element that triggered them, just like the iOS Dynamic Island.
-                The target element remains fully interactive and custom-styled within the expanding black card.
+                Toasts morph directly around the DOM element that triggered them, functioning similarly to the iOS Dynamic Island.
               </p>
             </div>
             
@@ -212,7 +217,7 @@ import {
       </main>
 
       <footer class="footer">
-        <p>Built with Angular and Motion. Custom spring equations for premium UI physics.</p>
+        <p>Built with Angular and Motion. Pure spring equations for premium performance.</p>
       </footer>
     </div>
 
@@ -227,42 +232,13 @@ import {
     .app-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 2rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Ambient animated blobs */
-    .blob-1, .blob-2 {
-      position: fixed;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      filter: blur(100px);
-      z-index: -1;
-      opacity: var(--blob-opacity, 0.12);
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .blob-1 {
-      top: -100px;
-      left: -100px;
-      background: #4f46e5;
-    }
-    .blob-2 {
-      bottom: -100px;
-      right: -100px;
-      background: #06b6d4;
+      padding: 2.5rem 1.5rem;
     }
 
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
       border-bottom: 1px solid var(--header-border);
       padding-bottom: 1.5rem;
-      transition: border-bottom-color 0.3s ease;
     }
 
     .logo-area {
@@ -274,49 +250,61 @@ import {
     .logo-text-icon {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--text-color);
-      background: var(--card-bg);
-      width: 48px;
-      height: 48px;
+      color: #ffffff;
+      background: #3b82f6;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-      transition: background 0.3s ease, border-color 0.3s ease;
+      border-radius: 8px;
     }
 
     h1 {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.025em;
-      color: var(--text-color);
-      transition: color 0.3s ease;
     }
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
-      transition: color 0.3s ease;
+      font-size: 0.875rem;
+      margin-top: 0.125rem;
     }
 
-    .badge {
-      background: rgba(99, 102, 241, 0.1);
-      color: #6366f1;
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      padding: 0.4rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
+    .instructions-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .instructions-banner h3 {
+      font-size: 1rem;
       font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .instructions-banner p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .instructions-banner ul {
+      margin-left: 1.25rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
     .grid-layout {
       display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 2rem;
+      grid-template-columns: 1fr 1.75fr;
+      gap: 1.5rem;
     }
 
     @media (max-width: 900px) {
@@ -330,30 +318,25 @@ import {
     }
 
     h2 {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text-color);
-      transition: color 0.3s ease;
+      margin-bottom: 0.25rem;
     }
 
     h3 {
-      font-size: 1.05rem;
-      font-weight: 500;
-      margin-bottom: 1rem;
-      color: var(--text-color);
-      transition: color 0.3s ease;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
     }
 
     .panel-desc {
       color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-      transition: color 0.3s ease;
+      font-size: 0.825rem;
+      margin-bottom: 1.25rem;
     }
 
     .control-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .control-group label {
@@ -362,18 +345,17 @@ import {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #64748b;
-      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      margin-bottom: 0.375rem;
     }
 
     .theme-selector {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.375rem;
       background: var(--theme-btn-bg);
       padding: 0.25rem;
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid var(--panel-border);
-      transition: background 0.3s ease, border-color 0.3s ease;
     }
 
     .theme-selector button {
@@ -381,13 +363,13 @@ import {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      padding: 0.5rem;
+      padding: 0.375rem;
       font-size: 0.8rem;
       font-weight: 500;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       font-family: var(--font-family);
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
     .theme-selector button.active {
@@ -400,13 +382,12 @@ import {
       width: 100%;
       background: var(--input-bg);
       border: 1px solid var(--input-border);
-      border-radius: 10px;
+      border-radius: 6px;
       color: var(--text-color);
       font-family: var(--font-family);
-      padding: 0.65rem 0.9rem;
+      padding: 0.5rem 0.75rem;
       font-size: 0.85rem;
       outline: none;
-      transition: border-color 0.2s ease, background 0.3s ease, color 0.3s ease;
     }
 
     .select-input:focus, .text-input:focus, .textarea-input:focus, .num-input:focus {
@@ -416,20 +397,20 @@ import {
     .offset-inputs {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .offset-inputs span {
       display: block;
       font-size: 0.7rem;
-      color: #64748b;
-      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+      margin-bottom: 0.125rem;
     }
 
     .btn-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     @media (max-width: 600px) {
@@ -442,75 +423,69 @@ import {
       border: 0;
       height: 1px;
       background: var(--panel-border);
-      margin: 2rem 0;
-      transition: background 0.3s ease;
+      margin: 1.5rem 0;
     }
 
     .custom-toast-form {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .textarea-input {
       resize: vertical;
-      min-height: 80px;
+      min-height: 60px;
     }
 
     .global-actions {
-      margin-top: 1.5rem;
+      margin-top: 1.25rem;
       display: flex;
       justify-content: flex-end;
     }
 
     .danger-text {
-      color: #f87171;
+      color: #ef4444;
     }
     .danger-text:hover {
       background: rgba(239, 68, 68, 0.08);
       border-color: rgba(239, 68, 68, 0.15);
     }
 
-    /* Island cards layout */
     .island-showcase-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
     }
 
     .island-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 1.5rem;
+      border-radius: 10px;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 200px;
-      transition: background 0.3s ease, border-color 0.3s ease;
+      min-height: 180px;
     }
 
     .island-card h4 {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      color: var(--text-color);
-      margin-bottom: 0.25rem;
-      transition: color 0.3s ease;
+      margin-bottom: 0.125rem;
     }
 
     .island-card p {
-      font-size: 0.8rem;
+      font-size: 0.775rem;
       color: var(--text-muted);
-      margin-bottom: 1.5rem;
-      transition: color 0.3s ease;
+      margin-bottom: 1rem;
     }
 
     .card-body {
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 1rem 0;
+      padding: 0.75rem 0;
     }
 
     .island-anchor-wrapper {
@@ -519,12 +494,11 @@ import {
 
     .footer {
       text-align: center;
-      margin-top: 5rem;
-      padding: 2rem 0;
+      margin-top: 4rem;
+      padding: 1.5rem 0;
       color: var(--text-muted);
       font-size: 0.75rem;
       border-top: 1px solid var(--card-border);
-      transition: border-color 0.3s ease, color 0.3s ease;
     }
   `]
 })

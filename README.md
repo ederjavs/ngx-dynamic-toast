@@ -191,6 +191,17 @@ export class SecureVaultComponent {
 }
 ```
 
+
+---
+
+## Dismissing & Interaction
+
+`ngx-dynamic-toast` provides multiple intuitive options to dismiss or interact with active notifications:
+
+1. **Hover to Reveal Close (X) Button**: Hovering over an active toast smoothly fades in a micro-close `X` icon on the right side of the pill. Clicking this button immediately dismisses the toast.
+2. **Elastic Swipe Gestures**: You can drag or flick any toast up or down using touch/pointer controls. Swiping past a threshold of `30px` triggers an elastic dismissal animation.
+3. **Tactile Click Feedback**: Standard click actions on the toast trigger a subtle iOS-style `:active` scaling press feedback (`0.97` scale) to confirm the user's action before dismissal.
+
 ---
 
 ## API Reference

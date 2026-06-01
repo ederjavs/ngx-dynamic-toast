@@ -439,6 +439,12 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
     this.view().button?.onClick();
   }
 
+  handleClose(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.dismissed.emit(this.toast().id);
+  }
+
   handlePointerDown(e: PointerEvent) {
     if (this.toast().exiting) return;
     const target = e.target as HTMLElement;
