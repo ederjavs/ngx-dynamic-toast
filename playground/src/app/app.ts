@@ -136,11 +136,31 @@ import {
 
         <!-- Dynamic Island / Element-Anchored Toasts Panel -->
         <section class="glass-panel action-panel wide-panel">
-          <h2>Dynamic Island Anchors</h2>
-          <p class="panel-desc">
-            Toasts will warp and expand directly around the DOM element that triggered them, just like the iOS Dynamic Island.
-            The target element remains fully interactive and custom-styled within the expanding black card.
-          </p>
+          <div class="island-panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="flex: 1; min-width: 280px;">
+              <h2>Dynamic Island Anchors</h2>
+              <p class="panel-desc" style="margin-bottom: 0;">
+                Toasts will warp and expand directly around the DOM element that triggered them, just like the iOS Dynamic Island.
+                The target element remains fully interactive and custom-styled within the expanding black card.
+              </p>
+            </div>
+            
+            <div class="control-group" style="margin-bottom: 0;">
+              <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.5rem;">Anchor Mode</label>
+              <div class="theme-selector" style="min-width: 260px;">
+                <button 
+                  [class.active]="islandMode() === 'island'" 
+                  (click)="islandMode.set('island')">
+                  Island (Border Wrap)
+                </button>
+                <button 
+                  [class.active]="islandMode() === 'inline'" 
+                  (click)="islandMode.set('inline')">
+                  Inline (Morph Element)
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div class="island-showcase-grid">
             <!-- Case 1: Save Action -->
@@ -150,7 +170,7 @@ import {
                 <p>Anchors a loading toast that completes and transforms into a success checkmark.</p>
               </div>
               <div class="card-body">
-                <div dtDynamicIsland dtIslandId="save-island" class="island-anchor-wrapper">
+                <div dtDynamicIsland [dtIslandMode]="islandMode()" dtIslandId="save-island" class="island-anchor-wrapper">
                   <button class="btn btn-primary" (click)="runSaveSimulation()">
                     Save Document
                   </button>
@@ -165,7 +185,7 @@ import {
                 <p>Launches a danger toast directly surrounding the button, prompting the user for instant confirmation.</p>
               </div>
               <div class="card-body">
-                <div dtDynamicIsland dtIslandId="confirm-island" class="island-anchor-wrapper">
+                <div dtDynamicIsland [dtIslandMode]="islandMode()" dtIslandId="confirm-island" class="island-anchor-wrapper">
                   <button class="btn btn-danger" (click)="runConfirmationPrompt()">
                     Delete Account
                   </button>
@@ -180,7 +200,7 @@ import {
                 <p>Expands into a custom status monitor attached directly to the diagnostic action.</p>
               </div>
               <div class="card-body">
-                <div dtDynamicIsland dtIslandId="music-island" class="island-anchor-wrapper">
+                <div dtDynamicIsland [dtIslandMode]="islandMode()" dtIslandId="music-island" class="island-anchor-wrapper">
                   <button class="btn btn-info" (click)="toggleMusicPlayback()">
                     {{ isPlaying ? 'Stop Diagnostic' : 'Start Diagnostic' }}
                   </button>
@@ -514,6 +534,7 @@ export class App {
 
   // States
   theme = signal<DynamicToastTheme>('light');
+  islandMode = signal<'island' | 'inline'>('island');
   position = signal<DynamicToastPosition>('top-right');
   toastOffsetTop = signal(16);
   toastOffsetBottom = signal(16);

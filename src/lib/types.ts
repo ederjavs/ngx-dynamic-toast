@@ -62,6 +62,7 @@ export interface DynamicToastItem extends DynamicToastOptions {
 }
 
 export type DynamicToastTheme = "light" | "dark" | "system";
+export type DynamicIslandMode = "island" | "inline";
 
 export interface DynamicToastConfig {
   position?: DynamicToastPosition;

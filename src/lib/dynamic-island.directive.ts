@@ -17,7 +17,7 @@ import {
 } from "@angular/core";
 import { DynamicToastService } from "./dynamic-toast.service";
 import { DynamicToastComponent } from "./dynamic-toast.component";
-import type { DynamicToastItem, DynamicToastTheme } from "./types";
+import type { DynamicToastItem, DynamicToastTheme, DynamicIslandMode } from "./types";
 
 @Directive({
   selector: "[dtDynamicIsland]",
@@ -32,6 +32,9 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
 
   /** Theme override for this island */
   dtIslandTheme = input<DynamicToastTheme>("dark");
+
+  /** The mode of the island: 'island' (border wrap) or 'inline' (element replacement) */
+  dtIslandMode = input<DynamicIslandMode>("island");
 
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly service = inject(DynamicToastService);
@@ -62,6 +65,7 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
     // Create the overlay container
     this.container = this.renderer.createElement("div");
     this.renderer.setAttribute(this.container, "data-dt-island-container", "");
+    this.renderer.setAttribute(this.container, "data-dt-viewport", "");
     this.renderer.setAttribute(
       this.container,
       "data-expand",
@@ -70,7 +74,7 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
     this.renderer.setAttribute(
       this.container,
       "data-theme",
-      this.dtIslandTheme(),
+      this.dtIslandTheme() === "system" ? "dark" : this.dtIslandTheme(),
     );
 
     // Insert container as sibling after the host
@@ -84,13 +88,18 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
       
       parent.insertBefore(wrapper, this.el.nativeElement);
       
-      // Make the host element appear ABOVE the toast
+      // Make the host element transition opacity smoothly
       this.renderer.setStyle(this.el.nativeElement, "position", "relative");
       this.renderer.setStyle(this.el.nativeElement, "z-index", "60");
+      this.renderer.setStyle(
+        this.el.nativeElement,
+        "transition",
+        "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
+      );
       
       wrapper.appendChild(this.el.nativeElement);
       
-      // Put the container behind it
+      // Put the container behind it initially
       this.renderer.setStyle(this.container, "z-index", "40");
       wrapper.appendChild(this.container!);
     }
@@ -129,6 +138,19 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
   private showToast(item: DynamicToastItem) {
     if (!this.container) return;
 
+    const mode = this.dtIslandMode();
+
+    if (mode === "inline") {
+      this.renderer.addClass(this.el.nativeElement, "dt-island-inline-active");
+      this.renderer.setStyle(this.el.nativeElement, "opacity", "0");
+      this.renderer.setStyle(this.el.nativeElement, "pointer-events", "none");
+      this.renderer.setStyle(this.container, "z-index", "60");
+    } else {
+      this.renderer.setStyle(this.el.nativeElement, "opacity", "1");
+      this.renderer.setStyle(this.el.nativeElement, "pointer-events", "auto");
+      this.renderer.setStyle(this.container, "z-index", "40");
+    }
+
     if (!this.toastCompRef) {
       this.toastCompRef = this.vcr.createComponent(DynamicToastComponent);
       this.container.appendChild(
@@ -143,6 +165,7 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
 
     // Update inputs
     this.toastCompRef.setInput("toast", item);
+    this.toastCompRef.setInput("theme", this.dtIslandTheme() === "system" ? "dark" : this.dtIslandTheme());
     this.toastCompRef.setInput("pillAlign", "center");
     this.toastCompRef.setInput("expandEdge", this.dtIslandExpand());
     this.toastCompRef.setInput("canExpand", true);
@@ -161,6 +184,11 @@ export class DynamicIslandDirective implements OnInit, OnDestroy {
     if (this.toastCompRef) {
       this.toastCompRef.destroy();
       this.toastCompRef = null;
+    }
+    if (this.container) {
+      this.renderer.removeClass(this.el.nativeElement, "dt-island-inline-active");
+      this.renderer.setStyle(this.el.nativeElement, "opacity", "1");
+      this.renderer.setStyle(this.el.nativeElement, "pointer-events", "auto");
     }
   }
 

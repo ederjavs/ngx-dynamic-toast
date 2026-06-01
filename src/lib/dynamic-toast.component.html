@@ -18,68 +18,70 @@
   (transitionend)="handleTransitionEnd($event)"
   (pointerdown)="handlePointerDown($event)"
 >
-  <div
-    data-dt-canvas
-    [attr.data-edge]="expandEdge()"
-    [style.filter]="'url(#' + filterId + ')'"
-  >
-    <svg
-      data-dt-svg
-      [attr.width]="WIDTH"
-      [attr.height]="svgHeight()"
-      [attr.viewBox]="'0 0 ' + WIDTH + ' ' + svgHeight()"
+  <div data-dt-canvas-wrapper>
+    <div
+      data-dt-canvas
+      [attr.data-edge]="expandEdge()"
+      [style.filter]="'url(#' + filterId + ')'"
     >
-      <title>Toast Notification</title>
-      <defs>
-        <filter
-          [id]="filterId"
-          x="-20%"
-          y="-20%"
-          width="140%"
-          height="140%"
-          colorInterpolationFilters="sRGB"
-        >
-          <feGaussianBlur
-            in="SourceGraphic"
-            [attr.stdDeviation]="blur()"
-            result="blur"
-          />
-          <feColorMatrix
-            in="blur"
-            mode="matrix"
-            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"
-            result="goo"
-          />
-          <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-        </filter>
-      </defs>
-
-      <!-- Pill: animated <rect> via Motion -->
-      <rect
-        #pillRect
-        data-dt-pill
-        [attr.rx]="resolvedRoundness()"
-        [attr.ry]="resolvedRoundness()"
-        [attr.fill]="view().fill"
-        y="0"
-        [style.x.px]="pillX()"
-        [style.width.px]="resolvedPillWidth()"
-        [style.height.px]="open() ? pillHeight() : HEIGHT"
-      />
-
-      <!-- Body: animated <rect> via Motion -->
-      <rect
-        #bodyRect
-        data-dt-body
-        [attr.y]="HEIGHT"
+      <svg
+        data-dt-svg
         [attr.width]="WIDTH"
-        [attr.rx]="resolvedRoundness()"
-        [attr.ry]="resolvedRoundness()"
-        [attr.fill]="view().fill"
-        [style.height.px]="open() ? expandedContent() : 0"
-        [style.opacity]="open() ? 1 : 0"
-      />
-    </svg>
+        [attr.height]="svgHeight()"
+        [attr.viewBox]="'0 0 ' + WIDTH + ' ' + svgHeight()"
+      >
+        <title>Toast Notification</title>
+        <defs>
+          <filter
+            [id]="filterId"
+            x="-20%"
+            y="-20%"
+            width="140%"
+            height="140%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feGaussianBlur
+              in="SourceGraphic"
+              [attr.stdDeviation]="blur()"
+              result="blur"
+            />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"
+              result="goo"
+            />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+
+        <!-- Pill: animated <rect> via Motion -->
+        <rect
+          #pillRect
+          data-dt-pill
+          [attr.rx]="resolvedRoundness()"
+          [attr.ry]="resolvedRoundness()"
+          [attr.fill]="view().fill"
+          y="0"
+          [style.x.px]="pillX()"
+          [style.width.px]="resolvedPillWidth()"
+          [style.height.px]="open() ? pillHeight() : HEIGHT"
+        />
+
+        <!-- Body: animated <rect> via Motion -->
+        <rect
+          #bodyRect
+          data-dt-body
+          [attr.y]="HEIGHT"
+          [attr.width]="WIDTH"
+          [attr.rx]="resolvedRoundness()"
+          [attr.ry]="resolvedRoundness()"
+          [attr.fill]="view().fill"
+          [style.height.px]="open() ? expandedContent() : 0"
+          [style.opacity]="open() ? 1 : 0"
+        />
+      </svg>
+    </div>
   </div>
 
   <div data-dt-header [attr.data-edge]="expandEdge()">

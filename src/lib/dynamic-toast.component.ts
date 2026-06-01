@@ -65,6 +65,7 @@ interface HeaderLayer {
 })
 export class DynamicToastComponent implements AfterViewInit, OnDestroy {
   toast = input.required<DynamicToastItem>();
+  theme = input<'light' | 'dark'>('dark');
   anchorWidth = input<number>(0);
   anchorHeight = input<number>(0);
   pillAlign = input<PillAlign>("left");
@@ -74,6 +75,10 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
   dismissed = output<string>();
   entered = output<string>();
   left = output<string>();
+
+  resolvedFill = computed(() => {
+    return this.theme() === 'light' ? '#ffffff' : '#151515';
+  });
 
   readonly HEIGHT = HEIGHT;
   readonly WIDTH = WIDTH;
@@ -224,7 +229,7 @@ export class DynamicToastComponent implements AfterViewInit, OnDestroy {
           iconSvg: t.iconSvg,
           styles: t.styles,
           button: t.button,
-          fill: t.fill ?? "#151515",
+          fill: t.fill ?? this.resolvedFill(),
         };
         this.applyView(next);
       },

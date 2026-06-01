@@ -12,6 +12,7 @@
     @for (t of group.items; track t.id) {
       <dt-toast
         [toast]="t"
+        [theme]="resolvedTheme()"
         [pillAlign]="group.pill"
         [expandEdge]="group.expand"
         [canExpand]="activeId() === undefined || activeId() === t.id"

@@ -147,12 +147,11 @@ export class DynamicToastService {
       autoExpandDelayMs: auto.expandDelayMs,
       autoCollapseDelayMs: auto.collapseDelayMs,
       exiting: false,
-      fill: merged.fill ?? "#151515",
+      fill: merged.fill,
     };
   }
 
   private upsert(item: DynamicToastItem) {
-    console.log('[DynamicToastService] UPSERT called for item:', item.id, item.state);
     // Circuit breaker for infinite loops
     this.loopCount++;
     if (this.loopCount > 50) {

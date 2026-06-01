@@ -439,14 +439,36 @@
 
 /* ================================== Themes ================================= */
 
-/* Dark theme: light description text on dark fill */
-[data-dt-viewport][data-theme="dark"] [data-dt-description] {
-  color: rgba(0, 0, 0, 0.5);
+/* Canvas wrapper for drop-shadows outside gooey filter */
+[data-dt-canvas-wrapper] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: visible;
 }
 
-/* Light theme: dark description text on light fill */
+[data-dt-viewport][data-theme="light"] [data-dt-canvas-wrapper] {
+  /* A beautiful, crisp dual-shadow that acts like a subtle border (0 0 1px) and a soft ambient shadow */
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.12)) drop-shadow(0 4px 16px rgba(0, 0, 0, 0.08));
+}
+
+/* Dark theme: white/light text and transparent white description */
+[data-dt-viewport][data-theme="dark"] [data-dt-toast] {
+  color: #ffffff;
+}
+[data-dt-viewport][data-theme="dark"] [data-dt-description] {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Light theme: dark slate text and transparent slate description */
+[data-dt-viewport][data-theme="light"] [data-dt-toast] {
+  color: #0f172a;
+}
 [data-dt-viewport][data-theme="light"] [data-dt-description] {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(15, 23, 42, 0.6);
 }
 
 /* ============================== Reduced Motion ============================= */
