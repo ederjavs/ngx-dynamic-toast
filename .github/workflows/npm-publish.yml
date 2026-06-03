@@ -1,0 +1,40 @@
+name: Publish Package to npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org/'
+          package-manager-cache: false
+
+      - name: Install dependencies with Bun
+        run: bun install --frozen-lockfile
+
+      - name: Build Angular Library
+        run: bunx ng-packagr -p ng-package.json
+
+      - name: Publish to npm with Trusted Publishing
+        run: |
+          cd dist/ngx-dynamic-toast
+          npm publish --access public
