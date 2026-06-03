@@ -1,6 +1,6 @@
 {
   "name": "ngx-dynamic-toast",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Dynamic toast notifications for Angular",
   "repository": {
     "type": "git",
@@ -29,9 +29,9 @@
     "playground": "bun --cwd playground start -- --port 4300"
   },
   "peerDependencies": {
-    "@angular/common": "^21.2.15",
-    "@angular/core": "^21.2.15",
-    "@angular/platform-browser": "^21.2.15",
+    "@angular/common": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
     "motion": "^12.40.0"
   },
   "dependencies": {
