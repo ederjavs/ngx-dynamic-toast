@@ -23,11 +23,6 @@
     "ngx",
     "ui"
   ],
-  "scripts": {
-    "build": "npx ng-packagr -p ng-package.json",
-    "watch": "npx ng-packagr -p ng-package.json --watch",
-    "playground": "bun --cwd playground start -- --port 4300"
-  },
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
@@ -38,7 +33,16 @@
     "tslib": "^2.8.1"
   },
   "sideEffects": false,
-  "workspaces": [
-    "playground"
-  ]
+  "module": "fesm2022/ngx-dynamic-toast.mjs",
+  "typings": "types/ngx-dynamic-toast.d.ts",
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./types/ngx-dynamic-toast.d.ts",
+      "default": "./fesm2022/ngx-dynamic-toast.mjs"
+    }
+  },
+  "type": "module"
 }
