@@ -311,7 +311,6 @@
   font-size: 0.825rem;
   line-height: 1rem;
   font-weight: 500;
-  text-transform: capitalize;
   color: var(--sileo-tone, currentColor);
 }
 
@@ -523,7 +522,8 @@
 
 [data-dt-viewport][data-theme="light"] [data-dt-canvas-wrapper] {
   /* A beautiful, crisp dual-shadow that acts like a subtle border (0 0 1px) and a soft ambient shadow */
-  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.12)) drop-shadow(0 4px 16px rgba(0, 0, 0, 0.08));
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.12))
+    drop-shadow(0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
 /* Dark theme: white/light text and transparent white description */
