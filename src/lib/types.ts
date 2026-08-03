@@ -69,6 +69,8 @@ export interface DynamicToastConfig {
   offset?: DynamicToastOffsetValue | DynamicToastOffsetConfig;
   options?: Partial<DynamicToastOptions>;
   theme?: DynamicToastTheme;
+  /** Stacking order of global toast viewports. Defaults above Angular CDK overlays. */
+  zIndex?: number;
 }
 
 export interface DynamicToastPromiseOptions<T = unknown> {
@@ -78,4 +80,3 @@ export interface DynamicToastPromiseOptions<T = unknown> {
   action?: DynamicToastOptions | ((data: T) => DynamicToastOptions);
   position?: DynamicToastPosition;
 }
-

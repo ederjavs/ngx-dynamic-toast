@@ -52,6 +52,8 @@ interface DynamicToastConfig {
     offset?: DynamicToastOffsetValue | DynamicToastOffsetConfig;
     options?: Partial<DynamicToastOptions>;
     theme?: DynamicToastTheme;
+    /** Stacking order of global toast viewports. Defaults above Angular CDK overlays. */
+    zIndex?: number;
 }
 interface DynamicToastPromiseOptions<T = unknown> {
     loading: Pick<DynamicToastOptions, "title" | "iconSvg">;
@@ -67,6 +69,7 @@ declare class DynamicToastViewportComponent implements OnInit, OnDestroy {
     position: _angular_core.InputSignal<DynamicToastPosition>;
     offset: _angular_core.InputSignal<string | number | Partial<Record<"top" | "right" | "bottom" | "left", ngx_dynamic_toast.DynamicToastOffsetValue>>>;
     theme: _angular_core.InputSignal<DynamicToastTheme>;
+    zIndex: _angular_core.InputSignal<number>;
     readonly service: DynamicToastService;
     private hovering;
     private systemThemeMql;
@@ -93,7 +96,7 @@ declare class DynamicToastViewportComponent implements OnInit, OnDestroy {
     onToastEnter(id: string): void;
     onToastLeave(id: string): void;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<DynamicToastViewportComponent, never>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicToastViewportComponent, "dt-viewport", never, { "position": { "alias": "position"; "required": false; "isSignal": true; }; "offset": { "alias": "offset"; "required": false; "isSignal": true; }; "theme": { "alias": "theme"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicToastViewportComponent, "dt-viewport", never, { "position": { "alias": "position"; "required": false; "isSignal": true; }; "offset": { "alias": "offset"; "required": false; "isSignal": true; }; "theme": { "alias": "theme"; "required": false; "isSignal": true; }; "zIndex": { "alias": "zIndex"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
 }
 
 declare class DynamicToastService {

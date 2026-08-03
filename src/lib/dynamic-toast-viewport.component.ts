@@ -41,6 +41,7 @@ export class DynamicToastViewportComponent implements OnInit, OnDestroy {
     undefined,
   );
   theme = input<DynamicToastTheme>("dark");
+  zIndex = input<number | undefined>(undefined);
 
   readonly service = inject(DynamicToastService);
   private hovering = signal(new Set<string>());

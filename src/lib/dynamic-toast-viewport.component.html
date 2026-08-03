@@ -4,6 +4,7 @@
     [attr.data-position]="group.pos"
     [attr.data-theme]="resolvedTheme()"
     aria-live="polite"
+    [style.--dt-z-index]="zIndex()"
     [style.top]="group.style?.top"
     [style.right]="group.style?.right"
     [style.bottom]="group.style?.bottom"

@@ -74,7 +74,9 @@ export const appConfig: ApplicationConfig = {
     provideDynamicToast({
       theme: 'system',
       position: 'top-right',
-      offset: { top: '24px', right: '24px' }
+      offset: { top: '24px', right: '24px' },
+      // Defaults to 1100, above Angular Material/CDK dialogs.
+      zIndex: 1100
     })
   ]
 };
@@ -247,6 +249,7 @@ The layout leverages CSS custom properties for effortless theme integration. You
 
 ```css
 :root {
+  --dt-z-index: 1100;
   --dt-font-sans: 'Inter', sans-serif;
   --dt-radius-pill: 16px;
   --dt-color-success: #10b981;

@@ -38,7 +38,10 @@ export class DynamicToastService {
   private _toasts = signal<DynamicToastItem[]>([]);
   readonly toasts = this._toasts.asReadonly();
 
-  private config: DynamicToastConfig = { position: "top-right", theme: "dark" };
+  private config: DynamicToastConfig = {
+    position: "top-right",
+    theme: "dark",
+  };
   private viewportRef: ComponentRef<DynamicToastViewportComponent> | null = null;
   private timers = new Map<string, number>();
   private paused = false;
@@ -72,6 +75,7 @@ export class DynamicToastService {
       this.viewportRef.setInput("position", this.config.position ?? "top-right");
       this.viewportRef.setInput("offset", this.config.offset);
       this.viewportRef.setInput("theme", this.config.theme ?? "dark");
+      this.viewportRef.setInput("zIndex", this.config.zIndex);
     }
   }
 
@@ -98,6 +102,7 @@ export class DynamicToastService {
     ref.setInput("position", this.config.position ?? "top-right");
     ref.setInput("offset", this.config.offset);
     ref.setInput("theme", this.config.theme ?? "dark");
+    ref.setInput("zIndex", this.config.zIndex);
 
     const el = ref.location.nativeElement;
     el.setAttribute("data-dt-root", "");
