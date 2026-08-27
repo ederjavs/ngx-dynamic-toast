@@ -75,7 +75,7 @@ export class DynamicToastService {
       this.viewportRef.setInput("position", this.config.position ?? "top-right");
       this.viewportRef.setInput("offset", this.config.offset);
       this.viewportRef.setInput("theme", this.config.theme ?? "dark");
-      this.viewportRef.setInput("zIndex", this.config.zIndex);
+      this.viewportRef.setInput("zIndex", this.config.zIndex !== undefined ? this.config.zIndex : this.getHighestZIndex());
     }
   }
 
@@ -94,15 +94,41 @@ export class DynamicToastService {
     return this.anchors.get(id);
   }
 
+  private getHighestZIndex(): number {
+    let maxZ = 1100;
+    if (typeof window === "undefined" || !this.document) return maxZ;
+
+    const elements = this.document.querySelectorAll(
+      ".cdk-overlay-container, .cdk-overlay-pane, mat-dialog-container, .modal, .swal2-container"
+    );
+
+    elements.forEach((el) => {
+      const style = window.getComputedStyle(el);
+      const zIndex = parseInt(style.zIndex, 10);
+      if (!isNaN(zIndex) && zIndex > maxZ) {
+        maxZ = zIndex;
+      }
+    });
+
+    return maxZ + 10;
+  }
+
   private ensureViewport() {
-    if (this.viewportRef || this.registeredViewport) return;
+    const targetZIndex = this.config.zIndex !== undefined ? this.config.zIndex : this.getHighestZIndex();
+
+    if (this.viewportRef || this.registeredViewport) {
+      if (this.viewportRef && this.config.zIndex === undefined) {
+        this.viewportRef.setInput("zIndex", targetZIndex);
+      }
+      return;
+    }
     const ref = createComponent(DynamicToastViewportComponent, {
       environmentInjector: this.envInjector,
     });
     ref.setInput("position", this.config.position ?? "top-right");
     ref.setInput("offset", this.config.offset);
     ref.setInput("theme", this.config.theme ?? "dark");
-    ref.setInput("zIndex", this.config.zIndex);
+    ref.setInput("zIndex", targetZIndex);
 
     const el = ref.location.nativeElement;
     el.setAttribute("data-dt-root", "");

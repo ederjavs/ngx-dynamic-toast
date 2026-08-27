@@ -29,9 +29,9 @@
     "playground": "bun --cwd playground start -- --port 4300"
   },
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
+    "@angular/common": "^21.0.0 || ^22.0.0",
+    "@angular/core": "^21.0.0 || ^22.0.0",
+    "@angular/platform-browser": "^21.0.0 || ^22.0.0",
     "motion": "^12.40.0"
   },
   "dependencies": {
